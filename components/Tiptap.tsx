@@ -1,6 +1,6 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react"
+import { useEditor, EditorContent  } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Toolbar from "./Toolbar"
 import BubbleMenuList from "./BubbleMenuList"
@@ -10,11 +10,22 @@ import Underline from '@tiptap/extension-underline'
 import Superscript from '@tiptap/extension-superscript'
 import Subscript from '@tiptap/extension-subscript'
 import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
+import HorizontalRule from '@tiptap/extension-horizontal-rule'
+
 
 function Tiptap({description, onChange}: {
     description: string,
     onChange: (richText: string) => void
 }) {
+  const CustomBold = Image.extend({
+    renderHTML({ HTMLAttributes }) {
+      // Original:
+      // return ['strong', HTMLAttributes, 0]
+      return ['b', HTMLAttributes, 0]
+    },
+  })
+  
   const editor = useEditor({
     extensions: [
         StarterKit.configure(),
@@ -31,7 +42,18 @@ function Tiptap({description, onChange}: {
                 optionalSlashes: true
               }
             ]
-          })
+          }),
+        Image.configure({
+          allowBase64: true,
+          HTMLAttributes: {
+            class: 'custom-iamge',
+          },
+        }),
+        HorizontalRule.configure({
+          HTMLAttributes: {
+            class: 'custom-hr',
+          },
+        }),
     ],
     content: description,
     editorProps: {
@@ -43,9 +65,10 @@ function Tiptap({description, onChange}: {
         onChange(editor.getHTML())
     }
   })
+  const isImageActive = editor ? editor.isActive("image") : false;
   return (
     <div>
-        <div className="toolbar">
+        <div className="toolbar mx-auto">
             <Toolbar editor={editor} />
         </div>
         <div className="container">
@@ -53,7 +76,7 @@ function Tiptap({description, onChange}: {
                 <input className="title" type="text" value={"Title"} />
             </div>
             {/* <FloatingMenuList editor={editor}/> */}
-            <BubbleMenuList editor={editor}/>
+            <BubbleMenuList editor={editor} isImageActive={isImageActive}/>
             <EditorContent editor={editor} />
         </div>
     </div>

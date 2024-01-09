@@ -23,6 +23,7 @@ export default function Home() {
   }, []);
   
   const onChnage = (richText: string) => {
+    console.log("text changed")
     console.log(richText);
   }
 
