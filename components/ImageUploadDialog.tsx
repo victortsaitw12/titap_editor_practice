@@ -44,9 +44,6 @@ const ImageUploadDialog = ({ editor }: Props) => {
     }
     const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
         const uploadFiles = e.target.files;
-        console.log('====================================');
-        console.log(uploadFiles?.length);
-        console.log('====================================');
         if (uploadFiles) {
             for (let i = 0; i < uploadFiles.length; i++) {
                 const currentFile = uploadFiles[i];

@@ -2,52 +2,118 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Dialog, DialogTrigger, DialogContent, DialogClose, DialogOverlay, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from './ui/dialog';
 import { Table, TableBody, TableRow, TableCell } from './ui/table';
-import { FileSearch, Search } from 'lucide-react';
+import { FileSearch, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { type Editor } from "@tiptap/react"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from './ui/tabs'
 import { clsx } from 'clsx';
 import axios from 'axios';
+import * as DialogPrimitive from "@radix-ui/react-dialog"
 
 type Props = {
     editor: Editor | null
 }
+interface UnsplashImage {
+    id: string;
+    urls: {
+        small: string;
+        regular: string;
+    };
+    description: string;
+    user: {
+        username: string;
+    }
+}
+interface GiphyImage {
+    id: string;
+    images: {
+        fixed_height_small: {
+            url: string;
+        }
+    };
+    title: string;
+}
 
 const ImageSearchDialog = ({ editor }: Props) => {
+    const [dialogIsOpen, setDialogIsOpen] = useState(false)
     const [activeIndex, setActiveIndex] = useState("0");
+
+    /* Unsplash Image Search */
     const [searchUnsplashImage, setSearchUnsplashImage] = useState("");
     const [totalUnsplashImages, setTotalUnsplashImages] = useState(0)
-    const [perpageUnsplashImages, setPerpageUnsplashImages] = useState(20)
-    const [searcGiphyImage, setSearchGiphyImage] = useState("");
-    const [totalGiphyImages, setTotalGiphyImages] = useState(0)
-    const [perpageGiphyImages, setPerpageGiphyImages] = useState(20)
+    const [totalPagesUnsplashImages, settotalPagesUnsplashImages] = useState(0)
+    const [currPageUnsplashImages, setCurrPageUnsplashImages] = useState(1);
+    const [resultUnsplash, setResultUnsplash] = useState<UnsplashImage[]>([]);
+    const perpageUnsplashImages = 20
+
+    const performUnsplashSearch = (currPage: number, perPage: number) => {
+        axios
+            .get(
+                `https://api.unsplash.com/search/photos/?page=${currPage}&query=${searchUnsplashImage}&per_page=${perPage}&client_id=365fb6cf7beeb53d0ed303f14c9fdf6a6d971b314373e046fcbdd39cacd0d62e`
+            )
+            .then(data => {
+                const result = data.data;
+                setTotalUnsplashImages(result.total)
+                settotalPagesUnsplashImages(result.total_pages)
+                setResultUnsplash(result.results)
+            })
+            .catch(err => {
+                console.log('Error happened during fetching!', err);
+            });
+    };
 
     const handleUnsplashSearch = () => {
-        // 在這裡使用 searchValue，例如發送 API 請求、處理搜索邏輯等
-        console.log("Unsplash搜尋值：", searchUnsplashImage);
-        
-        const performSearch = (query:string) => {
-            axios
-              .get(
-                `https://api.unsplash.com/search/photos/?page=1&query=${query}&per_page=20&client_id=365fb6cf7beeb53d0ed303f14c9fdf6a6d971b314373e046fcbdd39cacd0d62e`
-              )
-              .then(data => {
-                // this.setState({ imgs: data.data.results });
-                console.log(data.data)
-                const result = data.data.results;
-                setTotalUnsplashImages(data.data.total)
-              })
-              .catch(err => {
+        setCurrPageUnsplashImages(1);
+        performUnsplashSearch(currPageUnsplashImages, perpageUnsplashImages)
+    };
+    useEffect(() => {
+        performUnsplashSearch(currPageUnsplashImages, perpageUnsplashImages)
+    }, [currPageUnsplashImages])
+
+    useEffect(() => {
+        if (searchUnsplashImage === "") {
+            handleUnsplashSearch();
+        }
+    }, [searchUnsplashImage])
+
+
+    /* Giphy Image Search */
+    const [searcGiphyImage, setSearchGiphyImage] = useState("");
+    const [totalGiphyImages, setTotalGiphyImages] = useState(0)
+    const [totalPagesGiphyImages, settotalPagesGiphyImages] = useState(0)
+    const [currPageGiphyImages, setCurrPageGiphyImages] = useState(1);
+    const [resultGiphy, setResultGiphy] = useState<GiphyImage[]>([]);
+    const perpageGiphyImages = 20
+    const performGiphySearch = (currPage: number) => {
+        axios
+            .get(
+                `https://api.giphy.com/v1/gifs/search?api_key=y1IAECJJz68f3xIdDy5eRQehtezIBAsS&q=${searcGiphyImage}&limit=${perpageGiphyImages}&offset=${currPage * perpageGiphyImages + 1}`
+            )
+            .then(data => {
+                const result = data.data;
+                setTotalGiphyImages(result.pagination.total_count)
+                const totalPages = Math.ceil(result.pagination.total_count / result.pagination.count)
+                settotalPagesGiphyImages(totalPages);
+                setResultGiphy(result.data)
+            })
+            .catch(err => {
                 console.log('Error happened during fetching!', err);
-              });
-          };
-          performSearch(searchUnsplashImage)
+            });
     };
+
     const handleGiphySearch = () => {
-        // 在這裡使用 searchValue，例如發送 API 請求、處理搜索邏輯等
-        console.log("Giphy搜尋值：", searcGiphyImage);
-        console.log("url:" + `https://giphy.com/search/${searcGiphyImage}`)
-        
+        setCurrPageGiphyImages(1);
+        performGiphySearch(currPageGiphyImages)
     };
+    useEffect(() => {
+        performGiphySearch(currPageGiphyImages)
+    }, [currPageGiphyImages])
+    useEffect(() => {
+        if (searcGiphyImage === "") {
+            handleGiphySearch();
+        }
+    }, [searcGiphyImage])
+
+    /* Both Event */
     const handleKeyDown = (e: any, type: string) => {
         if (e.key === "Enter") {
             if (type === "Unsplash") {
@@ -59,13 +125,20 @@ const ImageSearchDialog = ({ editor }: Props) => {
         }
     };
 
+    const clearSearchValue = () => {
+        setSearchUnsplashImage("")
+        setSearchGiphyImage("")
+    }
 
     return (
         <Dialog>
-            <DialogTrigger className='p-[10px]'>
+            <DialogTrigger className='p-[10px]' onClick={() => {
+                setDialogIsOpen(true)
+                clearSearchValue()
+            }}>
                 <FileSearch className='w-4 h-4' />
             </DialogTrigger>
-            <DialogContent className='dialogContent w-[800px]'>
+            {dialogIsOpen && <DialogContent className='dialogContent w-[800px] overflow-y-scroll'>
                 <DialogHeader className=''>
                     <DialogTitle>
                         <span>搜尋免費圖庫或 GIF</span>
@@ -75,13 +148,13 @@ const ImageSearchDialog = ({ editor }: Props) => {
                 {/* <DialogDescription> */}
                 <Tabs value={activeIndex} onValueChange={setActiveIndex} className='h-[700px]'>
                     <TabsList className='bg-white'>
-                        <TabsTrigger value="0" className=''>
+                        <TabsTrigger value="0" onClick={clearSearchValue}>
                             <svg width="16" height="16" viewBox="0 0 32 32" version="1.1" aria-labelledby="unsplash-home" aria-hidden="false">
                                 <path d="M10 9V0h12v9H10zm12 5h10v18H0V14h10v9h12v-9z"></path>
                             </svg>
                             <span className='ms-2'>Unsplash</span>
                         </TabsTrigger>
-                        <TabsTrigger value="1">
+                        <TabsTrigger value="1" onClick={clearSearchValue}>
                             <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 35" className="sc-1f039a7e-2 bMXkCi">
                                 <g fillRule="evenodd" clipRule="evenodd">
                                     <path fill="#00ff99" d="M0 3h4v29H0z"></path>
@@ -96,7 +169,7 @@ const ImageSearchDialog = ({ editor }: Props) => {
                         </TabsTrigger>
                     </TabsList>
                     <TabsContent value="0">
-                        <div className='searchUnsplashText flex justify-between items-center mt-4'>
+                        <div className='searchArea flex justify-between items-center mt-4'>
                             <div className='flex items-centers rounded-xl border py-3 w-[88%]'>
                                 <Search className='mx-2' size={20}></Search>
                                 <input placeholder='建議以英文搜尋效果最佳' className='outline-none w-full' value={searchUnsplashImage}
@@ -104,21 +177,72 @@ const ImageSearchDialog = ({ editor }: Props) => {
                             </div>
                             <button className='rounded-xl px-5 py-3 text-white bg-neutral-700 hover:bg-black cursor-pointer' onClick={handleUnsplashSearch}>搜尋</button>
                         </div>
-                        <div className='searchUnsplashResult'></div>
+                        <div className='resultArea mt-3'>
+                            <div className='resultText flex justify-between items-center'>
+                                <span className='text-sm text-neutral-400'>共{totalUnsplashImages}張圖片</span>
+                                {totalUnsplashImages > 0 && (<div className='flex'>
+                                    <ChevronLeft color={`${currPageUnsplashImages === 1 ? '#ccc' : 'black'}`} className={`${currPageUnsplashImages === 1 ? 'cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => {
+                                        setCurrPageUnsplashImages(prevPage => prevPage - 1)
+                                    }}></ChevronLeft>
+                                    <ChevronRight color={`${currPageUnsplashImages === totalPagesUnsplashImages ? '#ccc' : 'black'}`} className={`${currPageUnsplashImages === totalPagesUnsplashImages ? 'cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => {
+                                        setCurrPageUnsplashImages(prevPage => prevPage + 1)
+                                    }}></ChevronRight>
+                                </div>)}
+                            </div>
+                            <div className='resultImages columns-3 gap-4 mt-2'>
+                                {resultUnsplash && resultUnsplash.map((item) => (
+                                    <>
+                                        <button className='mb-1 cursor-pointer' onClick={() => {
+                                            editor && editor.chain().focus().setImage({ src: item.urls.regular, alt: item.description }).run()
+                                            clearSearchValue()
+                                            setDialogIsOpen(false)
+                                        }}>
+                                            <img key={item.id} src={item.urls.small} alt={item.description} />
+                                        </button>
+                                    </>
+                                ))}
+                            </div>
+                        </div>
                     </TabsContent>
                     <TabsContent value="1">
-                        <div className='searchGiphyText flex justify-between items-center mt-4'>
+                        <div className='searchArea flex justify-between items-center mt-4'>
                             <div className='flex items-centers rounded-xl border py-3 w-[88%]'>
                                 <Search className='mx-2' size={20}></Search>
                                 <input placeholder='建議以英文搜尋效果最佳' className='outline-none w-full' value={searcGiphyImage} onChange={(e) => setSearchGiphyImage(e.target.value)} onKeyDown={(e) => handleKeyDown(e, "Giphy")} />
                             </div>
                             <button className='rounded-xl px-5 py-3 text-white bg-neutral-700 hover:bg-black cursor-pointer' onClick={handleGiphySearch}>搜尋</button>
                         </div>
-                        <div className='searchGiphyResult'></div>
+                        <div className='resultArea mt-3'>
+                            <div className='resultText flex justify-between items-center'>
+                                <span className='text-sm text-neutral-400'>共{totalGiphyImages}張圖片</span>
+                                {totalGiphyImages > 0 && (<div className='flex'>
+                                    <ChevronLeft color={`${currPageGiphyImages === 1 ? '#ccc' : 'black'}`} className={`${currPageGiphyImages === 1 ? 'cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => {
+                                        setCurrPageGiphyImages(prevPage => prevPage - 1)
+                                    }}></ChevronLeft>
+                                    <ChevronRight color={`${currPageGiphyImages === totalPagesGiphyImages ? '#ccc' : 'black'}`} className={`${currPageGiphyImages === totalPagesGiphyImages ? 'cursor-not-allowed' : 'cursor-pointer'}`} onClick={() => {
+                                        setCurrPageGiphyImages(prevPage => prevPage + 1)
+                                    }}></ChevronRight>
+                                </div>)}
+                            </div>
+                            <div className='resultImages columns-3 gap-4 mt-2'>
+                                {resultGiphy && resultGiphy.map((item) => (
+                                    <>
+                                        <button className='mb-1 cursor-pointer w-full flex justify-center' onClick={() => {
+                                            editor && editor.chain().focus().setImage({ src: item.images.fixed_height_small.url, alt: item.title }).run()
+                                            clearSearchValue()
+                                            setDialogIsOpen(false)
+                                        }}>
+                                            <img key={item.id} src={item.images.fixed_height_small.url} alt={item.title} />
+                                        </button>
+                                    </>
+                                ))}
+                            </div>
+                        </div>
                     </TabsContent>
                 </Tabs>
                 {/* </DialogDescription> */}
-            </DialogContent>
+            </DialogContent>}
+
         </Dialog>
     );
 };
