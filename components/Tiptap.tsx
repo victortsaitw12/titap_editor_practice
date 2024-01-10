@@ -12,19 +12,13 @@ import Subscript from '@tiptap/extension-subscript'
 import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
-
+import BulletList from '@tiptap/extension-bullet-list'
+import OrderedList from '@tiptap/extension-ordered-list'
 
 function Tiptap({description, onChange}: {
     description: string,
     onChange: (richText: string) => void
 }) {
-  const CustomBold = Image.extend({
-    renderHTML({ HTMLAttributes }) {
-      // Original:
-      // return ['strong', HTMLAttributes, 0]
-      return ['b', HTMLAttributes, 0]
-    },
-  })
   
   const editor = useEditor({
     extensions: [
@@ -52,6 +46,16 @@ function Tiptap({description, onChange}: {
         HorizontalRule.configure({
           HTMLAttributes: {
             class: 'custom-hr',
+          },
+        }),
+        BulletList.configure({
+          HTMLAttributes: {
+            class: 'list',
+          },
+        }),
+        OrderedList.configure({
+          HTMLAttributes: {
+            class: 'order-list',
           },
         }),
     ],
