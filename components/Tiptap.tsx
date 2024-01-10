@@ -14,6 +14,7 @@ import Image from '@tiptap/extension-image'
 import HorizontalRule from '@tiptap/extension-horizontal-rule'
 import BulletList from '@tiptap/extension-bullet-list'
 import OrderedList from '@tiptap/extension-ordered-list'
+import Heading from '@tiptap/extension-heading'
 
 function Tiptap({description, onChange}: {
     description: string,
@@ -58,6 +59,7 @@ function Tiptap({description, onChange}: {
             class: 'order-list',
           },
         }),
+        Heading.configure()
     ],
     content: description,
     editorProps: {
