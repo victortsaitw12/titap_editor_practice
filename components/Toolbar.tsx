@@ -1,189 +1,242 @@
 "use client";
-import React, { useEffect, useState, useCallback, useRef } from 'react'
-import { type Editor } from "@tiptap/react"
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  useContext,
+} from "react";
+import { type Editor } from "@tiptap/react";
 import {
-    List,
-    ListOrdered,
-    Heading2,
-    Heading3,
-    AlignCenter,
-    Quote,
-    Code2,
-    Undo,
-    Redo,
-    Image,
-    Plus,
-    Link,
-    GalleryHorizontal,
-    FileSearch,
-    SeparatorHorizontal
+  List,
+  ListOrdered,
+  Heading2,
+  Heading3,
+  AlignCenter,
+  Quote,
+  Code2,
+  Undo,
+  Redo,
+  Image,
+  Plus,
+  Link,
+  GalleryHorizontal,
+  FileSearch,
+  SeparatorHorizontal,
 } from "lucide-react";
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Toggle } from "./ui/toggle"
-import ImageUploadDialog from "./ImageUploadDialog"
-import ImageSearchDialog from './ImageSearchDialog';
+import { Input } from "./ui/input";
+import { Button } from "./ui/button";
+import { Toggle } from "./ui/toggle";
+import ImageUploadDialog from "./ImageUploadDialog";
+import ImageSearchDialog from "./ImageSearchDialog";
+import MediaContentContext, {
+  MediaContentProps,
+} from "../context/mediaContentContext";
 
 type Props = {
-    editor: Editor | null
-}
+  editor: Editor | null;
+};
 function Toolbar({ editor }: Props) {
-    const [align, setAlign] = useState("left");
-    const toggleRef = useRef<HTMLDivElement | null>(null);
-    const mediaContentRef = useRef<HTMLDivElement | null>(null);
-    const setLink = useCallback(() => {
-        if (!editor) {
-            return;
-        }
+  const [align, setAlign] = useState("left");
+  const { isOpen, setIsOpen } = useContext<MediaContentProps | any>(
+    MediaContentContext
+  );
 
-        const isActiveLink = editor.isActive("link");
-        const previousUrl = editor.getAttributes('link')?.href;
-        const url = window.prompt('URL', previousUrl);
-
-        // cancelled
-        if (url === null) {
-            return;
-        }
-
-        // empty
-        if (url === '') {
-            editor.chain().focus().extendMarkRange('link').unsetLink().run();
-            return;
-        }
-
-        // update link
-        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
-
-    }, [editor])
-    const handleDividerClick = useCallback(() => {
-        editor?.chain().focus().setHorizontalRule().run();
-
-        // 模擬按下 Enter 鍵
-        const event = new KeyboardEvent('keydown', {
-            key: 'Enter',
-        });
-        document.dispatchEvent(event);
-    }, [editor]);
-
+  const toggleRef = useRef<HTMLDivElement | null>(null);
+  const mediaContentRef = useRef<HTMLDivElement | null>(null);
+  const setLink = useCallback(() => {
     if (!editor) {
-        return null;
+      return;
     }
 
-    const setTextAlign = () => {
-        if (align == "left") {
-            setAlign("center");
-        } else if (align == "center") {
-            setAlign("right");
-        } else {
-            setAlign("left");
+    const isActiveLink = editor.isActive("link");
+    const previousUrl = editor.getAttributes("link")?.href;
+    const url = window.prompt("URL", previousUrl);
+
+    // cancelled
+    if (url === null) {
+      return;
+    }
+
+    // empty
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+
+    // update link
+    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  }, [editor]);
+  const handleDividerClick = useCallback(() => {
+    editor?.chain().focus().setHorizontalRule().run();
+
+    // 模擬按下 Enter 鍵
+    const event = new KeyboardEvent("keydown", {
+      key: "Enter",
+    });
+    document.dispatchEvent(event);
+  }, [editor]);
+
+  if (!editor) {
+    return null;
+  }
+
+  const setTextAlign = () => {
+    if (align == "left") {
+      setAlign("center");
+    } else if (align == "center") {
+      setAlign("right");
+    } else {
+      setAlign("left");
+    }
+  };
+
+  const listClicked = editor.isActive("bulletList");
+  const orderListClicked = editor.isActive("orderedList");
+
+  return (
+    // <div className='border border-input bg-transparent rounded-sm'>
+    <>
+      <div
+        className="ps-[10px] pt-[5px] pe-[6px]"
+        onClick={(e) => {
+          setIsOpen(true);
+          e.stopPropagation();
+        }}
+      >
+        <button>
+          <Plus size={20}></Plus>
+        </button>
+        {isOpen && (
+          <div className="mediaContent" ref={mediaContentRef}>
+            <ImageUploadDialog editor={editor} />
+            <Toggle
+              className="bubble-menu-item"
+              size="sm"
+              pressed={editor.isActive("galleryHorizontal")}
+              onPressedChange={() => {
+                console.log("GalleryHorizontal");
+              }}
+            >
+              <GalleryHorizontal className="h-4 w-4" />
+            </Toggle>
+            <ImageSearchDialog editor={editor}></ImageSearchDialog>
+            <Toggle
+              className="bubble-menu-item"
+              size="sm"
+              pressed={editor.isActive("link")}
+              onPressedChange={setLink}
+            >
+              <Link className="h-4 w-4" />
+            </Toggle>
+            <Toggle
+              className="bubble-menu-item"
+              size="sm"
+              pressed={editor.isActive("separatorHorizontal")}
+              onPressedChange={handleDividerClick}
+            >
+              <SeparatorHorizontal className="h-4 w-4" />
+            </Toggle>
+          </div>
+        )}
+      </div>
+
+      <Toggle
+        className="menu-item"
+        size="sm"
+        pressed={editor.isActive("heading", { level: 2 })}
+        onPressedChange={() =>
+          editor.chain().focus().toggleHeading({ level: 2 }).run()
         }
-    }
+      >
+        <Heading2 className="h-4 w-4" />
+      </Toggle>
+      <Toggle
+        className="menu-item"
+        size="sm"
+        pressed={editor.isActive("heading", { level: 3 })}
+        onPressedChange={() =>
+          editor.chain().focus().toggleHeading({ level: 3 }).run()
+        }
+      >
+        <Heading3 className="h-4 w-4" />
+      </Toggle>
+      <Toggle
+        className="menu-item"
+        size="sm"
+        pressed={editor.isActive("blockquote")}
+        onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
+      >
+        <Quote className="h-4 w-4 text-black" />
+      </Toggle>
+      <Toggle
+        className="menu-item"
+        size="sm"
+        pressed={editor.isActive("codeBlock")}
+        onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}
+      >
+        <Code2 className="h-4 w-4 text-black" />
+      </Toggle>
+      <div
+        className={`${
+          listClicked || orderListClicked ? "cursor-not-allowed" : ""
+        }`}
+      >
+        <Toggle
+          disabled={listClicked || orderListClicked ? true : false}
+          className="menu-item disabled:bg-neutral-400"
+          size="sm"
+          pressed={editor.isActive("textAlign")}
+          onPressedChange={() => {
+            setTextAlign();
+            editor.chain().focus().setTextAlign(align).run();
+          }}
+        >
+          <AlignCenter className="h-4 w-4" />
+        </Toggle>
+      </div>
+      <div className={`${orderListClicked ? "cursor-not-allowed" : ""}`}>
+        <Toggle
+          disabled={orderListClicked ? true : false}
+          className="menu-item disabled:bg-neutral-400"
+          size="sm"
+          pressed={editor.isActive("bulletList")}
+          onPressedChange={() =>
+            editor.chain().focus().toggleBulletList().run()
+          }
+        >
+          <List className="h-4 w-4" />
+        </Toggle>
+      </div>
 
-    const listClicked = editor.isActive("bulletList");
-    const orderListClicked = editor.isActive("orderedList");
+      <div className={`${listClicked ? "cursor-not-allowed" : ""}`}>
+        <Toggle
+          disabled={listClicked ? true : false}
+          className="menu-item disabled:bg-neutral-400"
+          size="sm"
+          pressed={editor.isActive("orderedList")}
+          onPressedChange={() =>
+            editor.chain().focus().toggleOrderedList().run()
+          }
+        >
+          <ListOrdered className="h-4 w-4" />
+        </Toggle>
+      </div>
 
-    return (
-        // <div className='border border-input bg-transparent rounded-sm'>
-        <>
-            <div ref={toggleRef} className='ps-[10px] pt-[5px] pe-[6px]'>
-                <button onClick={() => {
-                    const mediaContent = mediaContentRef.current;
-                    if (mediaContent && mediaContent.style) {
-                        mediaContent.style.display = '';
-                    }
-                }}
-                    onBlur={() => {
-                        const mediaContent = mediaContentRef.current;
-                        if (mediaContent && mediaContent.style) {
-                            mediaContent.style.display = 'none';
-                        }
-                    }}>
-                    <Plus size={20}></Plus>
-                </button>
-            </div>
-
-            <Toggle
-                className='menu-item'
-                size="sm"
-                pressed={editor.isActive('heading', { level: 2 })}
-                onPressedChange={() =>
-                    editor.chain().focus().toggleHeading({ level: 2 }).run()
-                }>
-                <Heading2 className='h-4 w-4' />
-            </Toggle>
-            <Toggle
-                className='menu-item'
-                size="sm"
-                pressed={editor.isActive('heading', { level: 3 })}
-                onPressedChange={() =>
-                    editor.chain().focus().toggleHeading({ level: 3 }).run()
-                }>
-                <Heading3 className='h-4 w-4' />
-            </Toggle>
-            <Toggle
-                className='menu-item'
-                size="sm"
-                pressed={editor.isActive("blockquote")}
-                onPressedChange={() =>
-                    editor.chain().focus().toggleBlockquote().run()
-                }>
-                <Quote className='h-4 w-4 text-black' />
-            </Toggle>
-            <Toggle
-                className='menu-item'
-                size="sm"
-                pressed={editor.isActive("codeBlock")}
-                onPressedChange={() =>
-                    editor.chain().focus().toggleCodeBlock().run()
-                }>
-                <Code2 className='h-4 w-4 text-black' />
-            </Toggle>
-            <div className={`${listClicked || orderListClicked ? 'cursor-not-allowed' : ''}`}>
-                <Toggle
-                    disabled={listClicked || orderListClicked ? true : false}
-                    className='menu-item disabled:bg-neutral-400'
-                    size="sm"
-                    pressed={editor.isActive("textAlign")}
-                    onPressedChange={() => {
-                        setTextAlign();
-                        editor.chain().focus().setTextAlign(align).run();
-                    }}>
-                    <AlignCenter className='h-4 w-4' />
-                </Toggle>
-            </div>
-            <div className={`${orderListClicked ? 'cursor-not-allowed' : ''}`}>
-                <Toggle
-                    disabled={orderListClicked ? true : false}
-                    className='menu-item disabled:bg-neutral-400'
-                    size="sm"
-                    pressed={editor.isActive("bulletList")}
-                    onPressedChange={() =>
-                        editor.chain().focus().toggleBulletList().run()
-                    }>
-                    <List className='h-4 w-4' />
-                </Toggle>
-            </div>
-
-            <div className={`${listClicked ? 'cursor-not-allowed' : ''}`}>
-                <Toggle
-                    disabled={listClicked ? true : false}
-                    className='menu-item disabled:bg-neutral-400'
-                    size="sm"
-                    pressed={editor.isActive("orderedList")}
-                    onPressedChange={() =>
-                        editor.chain().focus().toggleOrderedList().run()
-                    }>
-                    <ListOrdered className='h-4 w-4' />
-                </Toggle>
-            </div>
-
-            <button className='left-seprator' onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
-                <Undo className='h-4 w-4' />
-            </button>
-            <button onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
-                <Redo className='h-4 w-4' />
-            </button>
-            <div className='mediaContent' style={{ display: "none" }} ref={mediaContentRef}>
+      <button
+        className="left-seprator"
+        onClick={() => editor.chain().focus().undo().run()}
+        disabled={!editor.can().undo()}
+      >
+        <Undo className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().redo().run()}
+        disabled={!editor.can().redo()}
+      >
+        <Redo className="h-4 w-4" />
+      </button>
+      {/* <div className='mediaContent' style={{ display: "none" }} ref={mediaContentRef}>
                 <ImageUploadDialog editor={editor} />
                 <Toggle
                     className='bubble-menu-item'
@@ -208,9 +261,9 @@ function Toolbar({ editor }: Props) {
                     <SeparatorHorizontal className='h-4 w-4' />
                 </Toggle>
 
-            </div>
-        </>
-    )
+            </div> */}
+    </>
+  );
 }
 
-export default Toolbar
+export default Toolbar;
