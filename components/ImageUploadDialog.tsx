@@ -149,7 +149,6 @@ const ImageUploadDialog = ({ editor }: Props) => {
                                     )}
                                 </TableRow>
                             ))}
-                            <hr></hr>
                         </TableBody>
                     </Table>
                 </div>

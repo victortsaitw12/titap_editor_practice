@@ -29,8 +29,8 @@ type Props = {
 }
 function Toolbar({ editor }: Props) {
     const [align, setAlign] = useState("left");
-
-
+    const toggleRef = useRef<HTMLDivElement | null>(null);
+    const mediaContentRef = useRef<HTMLDivElement | null>(null);
     const setLink = useCallback(() => {
         if (!editor) {
             return;
@@ -65,25 +65,6 @@ function Toolbar({ editor }: Props) {
         document.dispatchEvent(event);
     }, [editor]);
 
-    const toggleRef = useRef<HTMLButtonElement | null>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (event: any) => {
-            if (toggleRef.current && !toggleRef.current.contains(event.target)) {
-                const mediaContent = document.getElementById("mediaContent");
-                if (mediaContent && mediaContent.style) {
-                    mediaContent.style.display = 'none';
-                }
-            }
-        };
-
-        document.addEventListener('click', handleClickOutside);
-        return () => {
-            document.removeEventListener('click', handleClickOutside);
-        };
-    }, [toggleRef]);
-
-
     if (!editor) {
         return null;
     }
@@ -104,19 +85,23 @@ function Toolbar({ editor }: Props) {
     return (
         // <div className='border border-input bg-transparent rounded-sm'>
         <>
-            <Toggle
-                ref={toggleRef}
-                className='menu-item'
-                size="sm"
-                onClick={() => {
-                    const mediaContent = document.getElementById("mediaContent");
+            <div ref={toggleRef} className='ps-[10px] pt-[5px] pe-[6px]'>
+                <button onClick={() => {
+                    const mediaContent = mediaContentRef.current;
                     if (mediaContent && mediaContent.style) {
-
                         mediaContent.style.display = '';
                     }
-                }}>
-                <Plus></Plus>
-            </Toggle>
+                }}
+                    onBlur={() => {
+                        const mediaContent = mediaContentRef.current;
+                        if (mediaContent && mediaContent.style) {
+                            mediaContent.style.display = 'none';
+                        }
+                    }}>
+                    <Plus size={20}></Plus>
+                </button>
+            </div>
+
             <Toggle
                 className='menu-item'
                 size="sm"
@@ -198,7 +183,7 @@ function Toolbar({ editor }: Props) {
             <button onClick={() => editor.chain().focus().redo().run()} disabled={!editor.can().redo()}>
                 <Redo className='h-4 w-4' />
             </button>
-            <div id='mediaContent' className='mediaContent' style={{ display: "none" }}>
+            <div className='mediaContent' style={{ display: "none" }} ref={mediaContentRef}>
                 <ImageUploadDialog editor={editor} />
                 <Toggle
                     className='bubble-menu-item'
