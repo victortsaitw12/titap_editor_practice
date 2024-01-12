@@ -1,12 +1,5 @@
 "use client";
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-  ReactNode,
-  createContext,
-} from "react";
+import React, { useState, ReactNode, createContext } from "react";
 
 export interface MediaContentProps {
   isOpen: boolean;

@@ -42,8 +42,6 @@ function Toolbar({ editor }: Props) {
     MediaContentContext
   );
 
-  const toggleRef = useRef<HTMLDivElement | null>(null);
-  const mediaContentRef = useRef<HTMLDivElement | null>(null);
   const setLink = useCallback(() => {
     if (!editor) {
       return;
@@ -108,14 +106,14 @@ function Toolbar({ editor }: Props) {
           <Plus size={20}></Plus>
         </button>
         {isOpen && (
-          <div className="mediaContent" ref={mediaContentRef}>
+          <div className="mediaContent">
             <ImageUploadDialog editor={editor} />
             <Toggle
               className="bubble-menu-item"
               size="sm"
               pressed={editor.isActive("galleryHorizontal")}
               onPressedChange={() => {
-                console.log("GalleryHorizontal");
+                console.log("輪播圖");
               }}
             >
               <GalleryHorizontal className="h-4 w-4" />
@@ -236,32 +234,6 @@ function Toolbar({ editor }: Props) {
       >
         <Redo className="h-4 w-4" />
       </button>
-      {/* <div className='mediaContent' style={{ display: "none" }} ref={mediaContentRef}>
-                <ImageUploadDialog editor={editor} />
-                <Toggle
-                    className='bubble-menu-item'
-                    size="sm"
-                    pressed={editor.isActive("galleryHorizontal")}
-                    onPressedChange={() => { console.log("GalleryHorizontal") }}>
-                    <GalleryHorizontal className='h-4 w-4' />
-                </Toggle>
-                <ImageSearchDialog editor={editor}></ImageSearchDialog>
-                <Toggle
-                    className='bubble-menu-item'
-                    size="sm"
-                    pressed={editor.isActive("link")}
-                    onPressedChange={setLink}>
-                    <Link className='h-4 w-4' />
-                </Toggle>
-                <Toggle
-                    className='bubble-menu-item'
-                    size="sm"
-                    pressed={editor.isActive("separatorHorizontal")}
-                    onPressedChange={handleDividerClick}>
-                    <SeparatorHorizontal className='h-4 w-4' />
-                </Toggle>
-
-            </div> */}
     </>
   );
 }
