@@ -6,6 +6,7 @@ import { useState, useEffect, useContext } from "react";
 import MediaContentContext, {
   MediaContentProps,
 } from "../context/mediaContentContext";
+import LinkContext, { LinkProps } from "@/context/linkContext";
 
 export default function Home() {
   let timer: any;
@@ -14,6 +15,9 @@ export default function Home() {
   const { setIsOpen } = useContext<MediaContentProps | any>(
     MediaContentContext
   );
+  const { setLinkIsOpen, linkModify, setLinkModify } = useContext<
+    LinkProps | any
+  >(LinkContext);
 
   const updateContent = () => {
     timer = setInterval(() => {
@@ -39,6 +43,8 @@ export default function Home() {
       className="min-h-screen"
       onClick={(e) => {
         setIsOpen(false);
+        setLinkIsOpen(false);
+        setLinkModify(false);
       }}
     >
       <div className="head">
