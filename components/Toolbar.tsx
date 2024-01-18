@@ -1,11 +1,5 @@
 "use client";
-import React, {
-  useEffect,
-  useState,
-  useCallback,
-  useRef,
-  useContext,
-} from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
 import { type Editor } from "@tiptap/react";
 import {
   List,
@@ -32,6 +26,7 @@ import ImageSearchDialog from "./ImageSearchDialog";
 import MediaContentContext, {
   MediaContentProps,
 } from "../context/mediaContentContext";
+import MediaLinkDialog from "./MediaLinkDialog";
 
 type Props = {
   editor: Editor | null;
@@ -42,29 +37,6 @@ function Toolbar({ editor }: Props) {
     MediaContentContext
   );
 
-  const setLink = useCallback(() => {
-    if (!editor) {
-      return;
-    }
-
-    const isActiveLink = editor.isActive("link");
-    const previousUrl = editor.getAttributes("link")?.href;
-    const url = window.prompt("URL", previousUrl);
-
-    // cancelled
-    if (url === null) {
-      return;
-    }
-
-    // empty
-    if (url === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
-      return;
-    }
-
-    // update link
-    editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-  }, [editor]);
   const handleDividerClick = useCallback(() => {
     editor?.chain().focus().setHorizontalRule().run();
 
@@ -78,6 +50,8 @@ function Toolbar({ editor }: Props) {
   if (!editor) {
     return null;
   }
+  const listClicked = editor.isActive("bulletList");
+  const orderListClicked = editor.isActive("orderedList");
 
   const setTextAlign = () => {
     if (align == "left") {
@@ -88,9 +62,6 @@ function Toolbar({ editor }: Props) {
       setAlign("left");
     }
   };
-
-  const listClicked = editor.isActive("bulletList");
-  const orderListClicked = editor.isActive("orderedList");
 
   return (
     // <div className='border border-input bg-transparent rounded-sm'>
@@ -119,14 +90,7 @@ function Toolbar({ editor }: Props) {
               <GalleryHorizontal className="h-4 w-4" />
             </Toggle>
             <ImageSearchDialog editor={editor}></ImageSearchDialog>
-            <Toggle
-              className="bubble-menu-item"
-              size="sm"
-              pressed={editor.isActive("link")}
-              onPressedChange={setLink}
-            >
-              <Link className="h-4 w-4" />
-            </Toggle>
+            <MediaLinkDialog editor={editor}></MediaLinkDialog>
             <Toggle
               className="bubble-menu-item"
               size="sm"

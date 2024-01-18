@@ -74,7 +74,13 @@
     @apply bg-background text-foreground;
   }
 } */
-
+:root {
+  --youtube-border-width: 3px;
+  --instagram-border-width: 2px;
+  --instagram-width: 500px;
+  --twitter-border-width: 2px;
+  --twitter-width: 550px;
+}
 .head {
   display: flex;
   justify-content: space-between;
@@ -277,4 +283,21 @@ h3 {
 /* 網頁捲軸【把手】顏色 */
 ::-webkit-scrollbar-thumb {
   background: #ccc;
+}
+
+div[data-youtube-video] {
+  width: calc(740px + calc(var(--youtube-border-width) * 2));
+  border: var(--youtube-border-width) solid #000;
+  cursor: move !important;
+}
+div[data-instagram-post] {
+  width: calc(var(--instagram-width) + calc(var(--instagram-border-width) * 2));
+  border: var(--instagram-border-width) solid #ccc;
+  cursor: move !important;
+}
+div[data-twitter-post] {
+  width: calc(var(--twitter-width) + calc(var(--twitter-border-width) * 2));
+  height: 100%;
+  border: var(--twitter-border-width) solid #ccc;
+  cursor: move !important;
 }
