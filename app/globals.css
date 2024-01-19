@@ -301,3 +301,13 @@ div[data-twitter-post] {
   border: var(--twitter-border-width) solid #ccc;
   cursor: move !important;
 }
+/* Code for Firefox */
+.custom-a::-moz-selection {
+  color: #68cef8;
+  background: white;
+}
+
+.custom-a::selection {
+  color: #68cef8;
+  background: white;
+}

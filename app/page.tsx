@@ -44,7 +44,6 @@ export default function Home() {
       onClick={(e) => {
         setIsOpen(false);
         setLinkIsOpen(false);
-        setLinkModify(false);
       }}
     >
       <div className="head">

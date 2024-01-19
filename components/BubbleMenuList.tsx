@@ -27,6 +27,7 @@ type Props = {
   isYoutubeActive: boolean;
   isInstagramActive: boolean;
   isTwitterActive: boolean;
+  isLinkActive: boolean;
 };
 function BubbleMenuList({
   editor,
@@ -34,38 +35,58 @@ function BubbleMenuList({
   isYoutubeActive,
   isInstagramActive,
   isTwitterActive,
+  isLinkActive,
 }: Props) {
   const [linkValue, setLinkValue] = useState("");
   const { linkIsOpen, setLinkIsOpen, linkModify, setLinkModify } = useContext<
     LinkProps | any
   >(LinkContext);
-
+  useEffect(() => {
+    isLinkActive && !linkIsOpen ? setLinkModify(true) : setLinkModify(false);
+  }, [isLinkActive, linkIsOpen, setLinkModify]);
   if (!editor) {
     return null;
   }
   const handleKeyDown = (e: any) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && editor) {
       const url = e.target.value;
-      editor &&
+      const oldHref = editor.getAttributes("link").href;
+      if (oldHref) {
+        editor
+          .chain()
+          .focus()
+          .extendMarkRange("link")
+          .toggleLink({ href: url })
+          .run();
+      } else {
         editor
           .chain()
           .focus()
           .extendMarkRange("link")
           .setLink({ href: url })
           .run();
+      }
       setLinkIsOpen(false);
       setLinkModify(true);
+      e.stopPropagation();
     }
   };
   const mediaIsActive = isYoutubeActive || isInstagramActive || isTwitterActive;
   const textBubbleMenu =
-    !mediaIsActive && !isImageActive && !linkIsOpen && !linkModify;
+    !mediaIsActive &&
+    !isImageActive &&
+    !linkIsOpen &&
+    !linkModify &&
+    !isLinkActive;
   const linkInput = linkIsOpen && !linkModify;
+  const linkEdit = isLinkActive && linkModify;
 
   return (
     <>
       <BubbleMenu
-        className={` ${linkIsOpen || linkModify ? "" : "bubble-menu"}`}
+        className={` ${
+          linkIsOpen || linkModify || isLinkActive ? "" : "bubble-menu"
+        }`}
         tippyOptions={{ duration: 100 }}
         editor={editor}
       >
@@ -245,10 +266,14 @@ function BubbleMenuList({
           </div>
         )}
         {/* 進入或解除或編輯網址 area */}
-        {linkModify && (
+        {linkEdit && (
           <div className="text-sky-300 bg-white border border-gray-300 rounded-lg px-3 py-2 flex items-center justify-between">
-            <a href={`${linkValue}`} className="w-[200px]" target="_blank">
-              {linkValue}
+            <a
+              href={`${editor.getAttributes("link").href}`}
+              className="w-[200px]"
+              target="_blank"
+            >
+              {editor.getAttributes("link").href}
             </a>
             <div className="flex">
               <Pencil

@@ -1,28 +1,49 @@
 import Link from "@tiptap/extension-link";
 import { mergeAttributes } from "@tiptap/core";
-
+import { type Editor } from "@tiptap/react";
+import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
+import getMarkAttrs from "./utils/getMarkAttrs";
+import getMarkRange from "./utils/getMarkRange";
+type TestProps = {
+  editor: Editor | null;
+};
 export const CustomLink = Link.extend({
-  parseHTML() {
-    return [{ tag: "a" }, { tag: "span" }];
-  },
   renderHTML: ({ HTMLAttributes }) => {
     return [
       "a",
       mergeAttributes(HTMLAttributes, {
-        class: "",
-        // rel: null,
+        class: "custom-a",
         target: "_self",
-        href: null,
       }),
       0,
     ];
   },
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      onclick: {
-        default: null,
-      },
-    };
+  addProseMirrorPlugins() {
+    return [
+      new Plugin({
+        key: new PluginKey("eventHandler"),
+        props: {
+          handleClick(view, pos, event) {
+            const { schema, doc, tr } = view.state;
+            const attrs = getMarkAttrs(view.state, schema.marks.link);
+            const range = getMarkRange(doc.resolve(pos), schema.marks.link);
+            if (!range) {
+              return;
+            }
+            if (attrs.href) {
+              console.log("click a link");
+              const $start = doc.resolve(range.from);
+              const $end = doc.resolve(range.to);
+              console.log(`start=${$start},end=${$end}`);
+              const transaction = tr.setSelection(
+                new TextSelection($start, $end)
+              );
+              view.dispatch(transaction);
+              event.stopPropagation();
+            }
+          },
+        },
+      }),
+    ];
   },
 });
