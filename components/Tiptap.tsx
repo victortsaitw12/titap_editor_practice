@@ -14,6 +14,7 @@ import Youtube from "@tiptap/extension-youtube";
 import Instagram from "./custom-extension/extension-instagram";
 import Twitter from "./custom-extension/extension-twitter";
 import CustomLink from "./custom-extension/extension-link";
+import Facebook from "./custom-extension/extension-facebook";
 function Tiptap({
   description,
   onChange,
@@ -62,6 +63,7 @@ function Tiptap({
       Youtube.configure(),
       Instagram.configure(),
       Twitter.configure(),
+      Facebook.configure(),
     ],
     content: description,
     editorProps: {
@@ -79,6 +81,7 @@ function Tiptap({
   const isInstagramActive = editor ? editor.isActive("instagram") : false;
   const isLinkActive = editor ? editor.isActive("link") : false;
   const isTwitterActive = editor ? editor.isActive("twitter") : false;
+  const isFacebookActive = editor ? editor.isActive("facebook") : false;
   return (
     <div>
       <div className="toolbar mx-auto">
@@ -96,6 +99,7 @@ function Tiptap({
           isInstagramActive={isInstagramActive}
           isTwitterActive={isTwitterActive}
           isLinkActive={isLinkActive}
+          isFacebookActive={isFacebookActive}
         />
         <EditorContent editor={editor} />
       </div>

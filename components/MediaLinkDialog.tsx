@@ -15,6 +15,12 @@ import { type Editor } from "@tiptap/react";
 import { Table, TableBody, TableRow, TableCell } from "./ui/table";
 import React, { useState, useCallback, useEffect, useContext } from "react";
 import { Skeleton } from "./ui/skeleton";
+import {
+  FACEBOOK_POST_REGEX,
+  FACEBOOK_VIDEO_REGEX,
+} from "./custom-extension/extension-facebook";
+import { TWITTER_REGEX } from "./custom-extension/extension-twitter";
+import { INSTAGRAM_REGEX } from "./custom-extension/extension-instagram";
 
 type Props = {
   editor: Editor | null;
@@ -26,10 +32,6 @@ const MediaLinkDialog = ({ editor }: Props) => {
   const [mediaLinkCheck, setMediaLinkCheck] = useState(true);
   const YOUTUBE_REGEX =
     /^(https?:\/\/)?(www\.|music\.)?(youtube\.com|youtu\.be)\/(?!channel\/)(?!@)(.+)?$/;
-  const TWITTER_REGEX =
-    /^(https?:\/\/)?(www\.)?twitter\.com\/[a-zA-Z0-9_]+\/status\/(\d+)$/;
-  const INSTAGRAM_REGEX =
-    /^(https?:\/\/)?(www\.)?instagram\.com\/(?:p|reels)\/[a-zA-Z0-9_\-]+\/?/;
 
   const handleNewMedia = () => {
     editor && editor.chain().focus().enter().run();
@@ -44,20 +46,26 @@ const MediaLinkDialog = ({ editor }: Props) => {
           src: mediaLinkValue,
           width: 740,
         });
-        handleNewMedia();
       } else if (mediaLinkValue.match(TWITTER_REGEX)) {
         editor.commands.setTwitterPost({
           src: mediaLinkValue,
         });
-        handleNewMedia();
       } else if (mediaLinkValue.match(INSTAGRAM_REGEX)) {
         editor.commands.setInstagramPost({
           src: mediaLinkValue,
         });
-        handleNewMedia();
+      } else if (
+        mediaLinkValue.match(FACEBOOK_VIDEO_REGEX) ||
+        mediaLinkValue.match(FACEBOOK_POST_REGEX)
+      ) {
+        editor.commands.setFacebook({
+          src: mediaLinkValue,
+        });
       } else {
         setMediaLinkCheck(false);
+        return;
       }
+      handleNewMedia();
     }
   };
 
@@ -169,6 +177,21 @@ const MediaLinkDialog = ({ editor }: Props) => {
                       </a>
                     </TableCell>
                     <TableCell>嵌入單一則 Instagram 貼文</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="w-[150px] cursor-pointer">
+                      <a href="https://www.facebook.com/" target="_blank">
+                        <div className="flex items-center">
+                          <img
+                            src="https://static.xx.fbcdn.net/rsrc.php/yT/r/aGT3gskzWBf.ico"
+                            alt="Facebook"
+                            className="w-[16px] h-[16px] hover:shadow-none"
+                          />
+                          <p className="ms-3">Facebook</p>
+                        </div>
+                      </a>
+                    </TableCell>
+                    <TableCell>嵌入單一則 Facebook 貼文</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

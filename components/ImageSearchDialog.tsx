@@ -103,8 +103,6 @@ const ImageSearchDialog = ({ editor }: Props) => {
       )
       .then((data) => {
         const result = data.data;
-        // console.log(result.data);
-
         setTotalGiphyImages(result.pagination.total_count);
         const totalPages = Math.ceil(
           result.pagination.total_count / result.pagination.count

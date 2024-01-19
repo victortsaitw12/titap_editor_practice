@@ -28,6 +28,7 @@ type Props = {
   isInstagramActive: boolean;
   isTwitterActive: boolean;
   isLinkActive: boolean;
+  isFacebookActive: boolean;
 };
 function BubbleMenuList({
   editor,
@@ -36,6 +37,7 @@ function BubbleMenuList({
   isInstagramActive,
   isTwitterActive,
   isLinkActive,
+  isFacebookActive,
 }: Props) {
   const [linkValue, setLinkValue] = useState("");
   const { linkIsOpen, setLinkIsOpen, linkModify, setLinkModify } = useContext<
@@ -71,7 +73,8 @@ function BubbleMenuList({
       e.stopPropagation();
     }
   };
-  const mediaIsActive = isYoutubeActive || isInstagramActive || isTwitterActive;
+  const mediaIsActive =
+    isYoutubeActive || isInstagramActive || isTwitterActive || isFacebookActive;
   const textBubbleMenu =
     !mediaIsActive &&
     !isImageActive &&
@@ -281,8 +284,6 @@ function BubbleMenuList({
                 color={"#bbb"}
                 className="me-2 cursor-pointer"
                 onClick={(e) => {
-                  console.log("bubbleMenu linkModify1");
-
                   setLinkModify(false);
                   setLinkIsOpen(true);
                   e.stopPropagation();
@@ -293,9 +294,6 @@ function BubbleMenuList({
                 color={"#bbb"}
                 className="cursor-pointer"
                 onClick={() => {
-                  // console.log(editor && editor.getAttributes("link").href);
-                  console.log("bubbleMenu linkModify2");
-
                   editor &&
                     editor
                       .chain()

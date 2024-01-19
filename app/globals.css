@@ -76,10 +76,10 @@
 } */
 :root {
   --youtube-border-width: 3px;
-  --instagram-border-width: 2px;
+  --embed-border-width: 2px;
   --instagram-width: 500px;
-  --twitter-border-width: 2px;
   --twitter-width: 550px;
+  --facebook-width: 564px;
 }
 .head {
   display: flex;
@@ -291,14 +291,20 @@ div[data-youtube-video] {
   cursor: move !important;
 }
 div[data-instagram-post] {
-  width: calc(var(--instagram-width) + calc(var(--instagram-border-width) * 2));
-  border: var(--instagram-border-width) solid #ccc;
+  width: calc(var(--instagram-width) + calc(var(--embed-border-width) * 2));
+  border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
 div[data-twitter-post] {
-  width: calc(var(--twitter-width) + calc(var(--twitter-border-width) * 2));
+  width: calc(var(--twitter-width) + calc(var(--embed-border-width) * 2));
   height: 100%;
-  border: var(--twitter-border-width) solid #ccc;
+  border: var(--embed-border-width) solid #ddd;
+  cursor: move !important;
+}
+div[data-facebook] {
+  width: calc(var(--facebook-width) + calc(var(--embed-border-width) * 2));
+  height: 100%;
+  border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
 /* Code for Firefox */

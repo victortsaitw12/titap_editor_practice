@@ -31,10 +31,8 @@ export const CustomLink = Link.extend({
               return;
             }
             if (attrs.href) {
-              console.log("click a link");
               const $start = doc.resolve(range.from);
               const $end = doc.resolve(range.to);
-              console.log(`start=${$start},end=${$end}`);
               const transaction = tr.setSelection(
                 new TextSelection($start, $end)
               );
