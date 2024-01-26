@@ -14,7 +14,7 @@ const MediaContentContext = createContext<MediaContentProps | undefined>({
 interface ContainerProps {
   children: ReactNode;
 }
-
+// mediaContent為 + 多媒體content
 export const MediaContextProvider = ({ children }: ContainerProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 

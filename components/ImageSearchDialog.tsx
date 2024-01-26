@@ -263,7 +263,7 @@ const ImageSearchDialog = ({ editor }: Props) => {
                 <div className="resultImages columns-3 gap-4 mt-2">
                   {resultUnsplash &&
                     resultUnsplash.map((item) => (
-                      <>
+                      <React.Fragment key={item.id}>
                         <button
                           className="mb-1 cursor-pointer"
                           onClick={() => {
@@ -287,7 +287,7 @@ const ImageSearchDialog = ({ editor }: Props) => {
                             alt={item.description}
                           />
                         </button>
-                      </>
+                      </React.Fragment>
                     ))}
                 </div>
               </div>

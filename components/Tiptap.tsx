@@ -15,6 +15,8 @@ import Instagram from "./custom-extension/extension-instagram";
 import Twitter from "./custom-extension/extension-twitter";
 import CustomLink from "./custom-extension/extension-link";
 import Facebook from "./custom-extension/extension-facebook";
+import { useEffect } from "react";
+import Figure from "./custom-extension/extension-figure";
 function Tiptap({
   description,
   onChange,
@@ -64,6 +66,7 @@ function Tiptap({
       Instagram.configure(),
       Twitter.configure(),
       Facebook.configure(),
+      Figure.configure(),
     ],
     content: description,
     editorProps: {
@@ -75,13 +78,22 @@ function Tiptap({
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },
+    // onTransaction: ({ editor }) => {
+    //   // const cursorLine = editor.view.state.selection.$anchor.path[1]
+    //   console.log("cursorLine:", editor.view.state.selection.$anchor);
+    // },
   });
+
   const isImageActive = editor ? editor.isActive("image") : false;
+  const isFigureActive = editor ? editor.isActive("figure") : false;
   const isYoutubeActive = editor ? editor.isActive("youtube") : false;
   const isInstagramActive = editor ? editor.isActive("instagram") : false;
   const isLinkActive = editor ? editor.isActive("link") : false;
   const isTwitterActive = editor ? editor.isActive("twitter") : false;
   const isFacebookActive = editor ? editor.isActive("facebook") : false;
+  useEffect(() => {
+    console.log(`tiptap:${isFigureActive}`);
+  }, [isFigureActive]);
   return (
     <div>
       <div className="toolbar mx-auto">
@@ -100,6 +112,7 @@ function Tiptap({
           isTwitterActive={isTwitterActive}
           isLinkActive={isLinkActive}
           isFacebookActive={isFacebookActive}
+          isFigureActive={isFigureActive}
         />
         <EditorContent editor={editor} />
       </div>

@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Toggle } from "./ui/toggle";
 import LinkContext, { LinkProps } from "@/context/linkContext";
+import ImageCaptionDialog from "./ImageCaptionDialog";
 
 type Props = {
   editor: Editor | null;
@@ -29,6 +30,7 @@ type Props = {
   isTwitterActive: boolean;
   isLinkActive: boolean;
   isFacebookActive: boolean;
+  isFigureActive: boolean;
 };
 function BubbleMenuList({
   editor,
@@ -38,14 +40,39 @@ function BubbleMenuList({
   isTwitterActive,
   isLinkActive,
   isFacebookActive,
+  isFigureActive,
 }: Props) {
   const [linkValue, setLinkValue] = useState("");
+  const [imageFigureOpen, setImageFigureOpen] = useState<boolean>(true);
+
   const { linkIsOpen, setLinkIsOpen, linkModify, setLinkModify } = useContext<
     LinkProps | any
   >(LinkContext);
   useEffect(() => {
     isLinkActive && !linkIsOpen ? setLinkModify(true) : setLinkModify(false);
   }, [isLinkActive, linkIsOpen, setLinkModify]);
+  const mediaIsActive =
+    isYoutubeActive || isInstagramActive || isTwitterActive || isFacebookActive;
+  const imageFigure = isImageActive || isFigureActive;
+  const textBubbleMenu =
+    !mediaIsActive &&
+    !imageFigure &&
+    !linkIsOpen &&
+    !linkModify &&
+    !isLinkActive;
+  const linkInput = linkIsOpen && !linkModify;
+  const linkEdit = isLinkActive && linkModify;
+  useEffect(() => {
+    console.log(
+      `isFigureActive is:${isFigureActive},isImageActive is:${isImageActive}`
+    );
+    // if (imageFigure) {
+    //   setImageFigureOpen(true);
+    // }
+  }, [isFigureActive, isImageActive]);
+  // useEffect(() => {
+  //   console.log(`imageFigureOpen is:${imageFigureOpen}`);
+  // }, [imageFigureOpen]);
   if (!editor) {
     return null;
   }
@@ -73,23 +100,13 @@ function BubbleMenuList({
       e.stopPropagation();
     }
   };
-  const mediaIsActive =
-    isYoutubeActive || isInstagramActive || isTwitterActive || isFacebookActive;
-  const textBubbleMenu =
-    !mediaIsActive &&
-    !isImageActive &&
-    !linkIsOpen &&
-    !linkModify &&
-    !isLinkActive;
-  const linkInput = linkIsOpen && !linkModify;
-  const linkEdit = isLinkActive && linkModify;
 
   return (
     <>
       <BubbleMenu
         className={` ${
           linkIsOpen || linkModify || isLinkActive ? "" : "bubble-menu"
-        }`}
+        } `}
         tippyOptions={{ duration: 100 }}
         editor={editor}
       >
@@ -175,47 +192,67 @@ function BubbleMenuList({
           </>
         )}
         {/* 圖片 menu */}
-        {isImageActive && (
+        {imageFigure && (
           <>
-            <Toggle
-              className="bubble-menu-item"
-              size="sm"
-              pressed={editor.isActive("image")}
-              onPressedChange={() => {
-                console.log("normalImage button");
-              }}
-            >
-              <GalleryVertical></GalleryVertical>
-            </Toggle>
-            <Toggle
-              className={`bubble-menu-item`}
-              size="sm"
-              pressed={editor.isActive("image")}
-              onPressedChange={() => {
-                console.log("fullImage button");
-              }}
-            >
-              <Tv2></Tv2>
-            </Toggle>
-            <Toggle
+            {console.log(`imageFigure`)}
+            <div>test</div>
+            <div>
+              <Toggle
+                className="bubble-menu-item"
+                size="sm"
+                pressed={imageFigure}
+                onPressedChange={() => {
+                  editor
+                    .chain()
+                    .focus()
+                    .setFigureClass({ customClass: "" })
+                    .run();
+                }}
+              >
+                <GalleryVertical></GalleryVertical>
+              </Toggle>
+              <Toggle
+                className={`bubble-menu-item`}
+                size="sm"
+                pressed={imageFigure}
+                onPressedChange={() => {
+                  editor
+                    .chain()
+                    .focus()
+                    .setFigureClass({ customClass: "fullImage" })
+                    .run();
+                }}
+              >
+                <Tv2></Tv2>
+              </Toggle>
+              {/* <Toggle
               className="bubble-menu-item left-seprator"
               size="sm"
               pressed={editor.isActive("image")}
               onPressedChange={() => console.log("image is active1")}
             >
               <Pencil></Pencil>
-            </Toggle>
-            <Toggle
-              className="bubble-menu-item"
-              size="sm"
-              pressed={editor.isActive("image")}
-              onPressedChange={() =>
-                editor.chain().focus().setImage({ src: "" }).run()
-              }
-            >
-              <Trash2></Trash2>
-            </Toggle>
+            </Toggle> */}
+              <ImageCaptionDialog
+                editor={editor}
+                imageFigureOpen={imageFigureOpen}
+                setImageFigureOpen={setImageFigureOpen}
+              ></ImageCaptionDialog>
+              <Toggle
+                className="bubble-menu-item"
+                size="sm"
+                // pressed={editor.isActive("figure")}
+                pressed={imageFigure}
+                onPressedChange={() => {
+                  console.log("click here to delete figure");
+                  editor.chain().focus().lift("figure").deleteSelection().run();
+                }}
+              >
+                <Trash2></Trash2>
+              </Toggle>
+            </div>
           </>
+
           // 顯示圖片相關的選項
         )}
         {/* Youtube,Instagram,Twitter menu */}

@@ -32,9 +32,14 @@ type Props = {
 };
 
 const ImageUploadDialog = ({ editor }: Props) => {
-  const [imageLinkDisabled, setImageLinkDisabled] = useState(true);
+  const [imageLinkDisabled, setImageLinkDisabled] = useState<
+    { disabled: boolean }[]
+  >([{ disabled: true }]);
   const [selectedImages, setSelectedImages] = useState<
     { file: string; alt: string }[]
+  >([]);
+  const [imagesDescription, setImagesDescription] = useState<
+    { caption: string; link: string }[]
   >([]);
   const { setIsOpen } = useContext<MediaContentProps | any>(
     MediaContentContext
@@ -61,16 +66,33 @@ const ImageUploadDialog = ({ editor }: Props) => {
         alt: altText,
       },
     ]);
+    setImageLinkDisabled((prevImages) => [
+      ...prevImages,
+      {
+        disabled: true,
+      },
+    ]);
   };
-  const addImageToEditor = (images: { file: string; alt: string }[]) => {
+  const addImageToEditor = (
+    images: { file: string; alt: string }[],
+    imagesDescription: { caption: string; link: string }[]
+  ) => {
     if (editor && images) {
-      images.map((item) => {
+      images.map((item, index) => {
         editor
           .chain()
           .focus()
-          .setImage({ src: item.file, alt: item.alt })
+          .setFigure({
+            src: item.file,
+            caption: imagesDescription[index]?.caption,
+            alt: imagesDescription[index]?.caption,
+            link: imagesDescription[index]?.link,
+          })
           .run();
       });
+      setSelectedImages([]);
+      setImagesDescription([]);
+      setImageLinkDisabled([{ disabled: true }]);
     }
   };
   const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,11 +107,41 @@ const ImageUploadDialog = ({ editor }: Props) => {
     }
     return;
   };
-  const handleImageLink = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageLink = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const imageDescription = e.target.value;
-    imageDescription.length > 0
-      ? setImageLinkDisabled(false)
-      : setImageLinkDisabled(true);
+
+    // 改 caption
+    const updatedImageDescription = [...imagesDescription];
+    updatedImageDescription[index] = {
+      ...updatedImageDescription[index],
+      caption: imageDescription,
+    };
+    if (imageDescription.length === 0) {
+      updatedImageDescription[index].link = "";
+    }
+    setImagesDescription(updatedImageDescription);
+
+    // 改 link disabled狀態
+    const updatedImageLinkDisabled = [...imageLinkDisabled];
+    updatedImageLinkDisabled[index] = {
+      disabled: imageDescription.length > 0 ? false : true,
+    };
+    setImageLinkDisabled(updatedImageLinkDisabled);
+  };
+  const handleImageLinkValue = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const imageLink = e.target.value;
+    const updateImageLink = [...imagesDescription];
+    updateImageLink[index] = {
+      ...updateImageLink[index],
+      link: imageLink,
+    };
+    setImagesDescription(updateImageLink);
   };
   const handleTrashClick = (index: number) => {
     setSelectedImages((prevImages) => {
@@ -182,27 +234,34 @@ const ImageUploadDialog = ({ editor }: Props) => {
                             <input
                               placeholder="請輸入圖片敘述"
                               className="border-0 focus:border-0 ms-2 w-[75%] outline-none"
-                              onChange={(e) => handleImageLink(e)}
+                              onChange={(e) => handleImageLink(e, index)}
                             />
                           </div>
                         </TableCell>
                         <TableCell
                           className={`ps-[1px] pe-[10px] w-[35%] ${
-                            imageLinkDisabled ? "opacity-70" : ""
+                            imageLinkDisabled[index]?.disabled
+                              ? "opacity-70"
+                              : ""
                           }`}
                         >
                           <div
                             className={`flex items-center border rounded-xl px-3 py-2 ${
-                              imageLinkDisabled ? "bg-neutral-300" : ""
+                              imageLinkDisabled[index]?.disabled
+                                ? "bg-neutral-300"
+                                : ""
                             }`}
                           >
                             <Link className="w-4 h-4"></Link>
                             <input
                               placeholder="請輸入連結，例：https://..."
                               className={`border-0 focus:border-0 ms-2 w-[75%] ${
-                                imageLinkDisabled ? "cursor-not-allowed " : ""
+                                imageLinkDisabled[index]?.disabled
+                                  ? "cursor-not-allowed "
+                                  : ""
                               } outline-none`}
-                              disabled={imageLinkDisabled}
+                              disabled={imageLinkDisabled[index]?.disabled}
+                              onChange={(e) => handleImageLinkValue(e, index)}
                             />
                           </div>
                         </TableCell>
@@ -250,12 +309,15 @@ const ImageUploadDialog = ({ editor }: Props) => {
             }
           >
             <span
-              onClick={(e) => {
-                addImageToEditor(selectedImages);
-                setSelectedImages([]);
-                editor && editor.chain().focus().enter().run();
+              onClick={async (e) => {
+                await addImageToEditor(selectedImages, imagesDescription);
+                console.log("test1");
                 setIsOpen(false);
+                console.log("test2");
                 e.stopPropagation();
+                console.log("test3");
+                editor?.commands.createParagraphNear();
+                console.log("test4");
               }}
             >
               確認

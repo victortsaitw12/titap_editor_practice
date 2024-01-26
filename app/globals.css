@@ -76,7 +76,7 @@
 } */
 :root {
   --youtube-border-width: 3px;
-  --embed-border-width: 2px;
+  --embed-border-width: 2.5px;
   --instagram-width: 500px;
   --twitter-width: 550px;
   --facebook-width: 564px;
@@ -307,13 +307,46 @@ div[data-facebook] {
   border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
+figure[data-figure] {
+  /* width: calc(740px + calc(var(--embed-border-width) * 2)); */
+  /* height: 100%; */
+  /* border: var(--embed-border-width) solid #ddd; */
+  /* cursor: move !important; */
+  /* width: calc(100vw - 4px); */
+  /* width: 100vw; */
+  /* transform: translateX(-373px); */
+}
+figure[data-figure].fullImage {
+  /* width: calc(740px + calc(var(--embed-border-width) * 2)); */
+  /* height: 100%; */
+  /* border: var(--embed-border-width) solid #ddd; */
+  /* cursor: move !important; */
+  /* width: calc(100vw - 4px); */
+  width: 100vw;
+  transform: translateX(-373px);
+}
+.figure:hover {
+  box-shadow: none;
+}
+figure[data-figure]:hover {
+  box-shadow: 0px 0px 0px 2px aqua;
+}
 /* Code for Firefox */
-.custom-a::-moz-selection {
+.custom-a::-moz-selection,
+.caption::-moz-selection {
   color: #68cef8;
   background: white;
 }
 
-.custom-a::selection {
+.custom-a::selection,
+.caption::selection {
   color: #68cef8;
   background: white;
+}
+figcaption {
+  margin-top: 0.25rem;
+  text-align: center;
+  padding: 0.5rem;
+  /* border: 2px dashed #0d0d0d20; */
+  /* border-radius: 0.5rem; */
 }
