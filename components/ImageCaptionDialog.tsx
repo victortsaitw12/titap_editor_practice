@@ -18,7 +18,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "./ui/dialog";
-import { Table, TableBody, TableRow, TableCell } from "./ui/table";
 import {
   Image,
   Info,
@@ -30,9 +29,6 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { type Editor } from "@tiptap/react";
-import MediaContentContext, {
-  MediaContentProps,
-} from "@/context/mediaContentContext";
 import { setNode } from "./custom-extension/extension-figure/utils/function";
 
 type ImageCaptionDialogProps = {
@@ -141,23 +137,21 @@ const ImageCaptionDialog = ({
         </div>
         <hr className="w-[106%] translate-x-[-3%] mt-5"></hr>
         <div className="flex justify-center items-center">
-          <DialogClose className="rounded-xl text-black bg-white px-5 py-3 hover:bg-neutral-100 disabled:cursor-not-allowed">
-            <span
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-            >
-              取消
-            </span>
+          <DialogClose
+            className="rounded-xl text-black bg-white px-5 py-3 hover:bg-neutral-100 disabled:cursor-not-allowed"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            <span>取消</span>
           </DialogClose>
-          <DialogClose className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400">
-            <span
-              onClick={(e) => {
-                handleSetImageCaption();
-              }}
-            >
-              確認
-            </span>
+          <DialogClose
+            className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+            onClick={(e) => {
+              handleSetImageCaption();
+            }}
+          >
+            <span>確認</span>
           </DialogClose>
         </div>
       </DialogContent>

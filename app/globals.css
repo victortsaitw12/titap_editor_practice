@@ -74,6 +74,9 @@
     @apply bg-background text-foreground;
   }
 } */
+body {
+  overflow-x: hidden;
+}
 :root {
   --youtube-border-width: 3px;
   --embed-border-width: 2.5px;
@@ -307,8 +310,8 @@ div[data-facebook] {
   border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
-
-figure[data-figure].fullImage {
+figure[data-figure].fullFigure,
+.fullImage {
   width: 100vw;
   transform: translateX(-373px);
 }

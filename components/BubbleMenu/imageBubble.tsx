@@ -4,7 +4,10 @@ import { GalleryVertical, Tv2, Trash2 } from "lucide-react";
 import { Editor } from "@tiptap/react";
 import { Toggle } from "../ui/toggle";
 import ImageCaptionDialog from "../ImageCaptionDialog";
-import { deleteNode } from "../custom-extension/extension-figure/utils/function";
+import {
+  changeNodeClass,
+  deleteNode,
+} from "../custom-extension/extension-figure/utils/function";
 
 interface ImageFigureMenuProps {
   editor: Editor;
@@ -26,7 +29,11 @@ const ImageFigureMenu = ({
         size="sm"
         pressed={true}
         onPressedChange={() => {
-          editor.chain().focus().setFigureClass({ customClass: "" }).run();
+          changeNodeClass(
+            editor,
+            isFigureActive ? "figure" : "image",
+            "normal"
+          );
         }}
       >
         <GalleryVertical></GalleryVertical>
@@ -36,11 +43,12 @@ const ImageFigureMenu = ({
         size="sm"
         pressed={true}
         onPressedChange={() => {
-          editor
-            .chain()
-            .focus()
-            .setFigureClass({ customClass: "fullImage" })
-            .run();
+          console.log(`isFigureActive:${isFigureActive}`);
+          changeNodeClass(
+            editor,
+            isFigureActive ? "figure" : "image",
+            "fullScreen"
+          );
         }}
       >
         <Tv2></Tv2>

@@ -164,7 +164,50 @@ const ImageUploadDialog = ({ editor }: Props) => {
       return newImages;
     });
   };
+  useEffect(() => {
+    selectedImages.map((item, index) => {
+      console.log(
+        `index:${index},src:${item.file ? "Yes" : "No"},alt:${
+          item.alt
+        },caption:${imagesDescription[index]?.caption},link:${
+          imagesDescription[index]?.link
+        }`
+      );
+    });
+  }, [selectedImages, imagesDescription]);
 
+  // 拖曳列元素
+  const [tmpImages, setTmpImages] = useState<{ file: string; alt: string }[]>(
+    []
+  );
+  const handleDragStart = (
+    index: number,
+    e: React.DragEvent<HTMLDivElement>
+  ) => {
+    e.dataTransfer.setData("text/plain", String(index));
+  };
+  const handleDragOver = (
+    index: number,
+    e: React.DragEvent<HTMLDivElement>
+  ) => {
+    e.preventDefault();
+    const draggedOverIndex = index;
+    const draggedIndex = Number(e.dataTransfer.getData("text/plain"));
+    console.log(
+      `draggedIndex:${draggedIndex},draggedOverIndex:${draggedOverIndex}`
+    );
+
+    if (draggedIndex !== draggedOverIndex) {
+      // 更新 selectedImages 的順序
+      const reorderedImages = [...selectedImages];
+      const [draggedImage] = reorderedImages.splice(draggedIndex, 1);
+      reorderedImages.splice(draggedOverIndex, 0, draggedImage);
+      setTmpImages(reorderedImages);
+    }
+  };
+  const handleDragEnd = () => {
+    setSelectedImages(tmpImages);
+  };
   return (
     <Dialog>
       <DialogTrigger className="p-[10px]">
@@ -237,9 +280,18 @@ const ImageUploadDialog = ({ editor }: Props) => {
                         <TableCell className="ps-[5px] pe-[10px] text-lg">
                           {index + 1}
                         </TableCell>
-                        <TableCell className="px-0">
+                        <TableCell
+                          className="px-0 hover:cursor-pointer"
+                          draggable
+                          onDragStart={(e) => handleDragStart(index, e)}
+                          onDragOver={(e) => handleDragOver(index, e)}
+                          onDragEnd={handleDragEnd}
+                        >
                           <div className="border rounded-md p-2 border-neutral-400">
-                            <ArrowDownUp className="w-4 h-4"></ArrowDownUp>
+                            <ArrowDownUp
+                              className="w-4 h-4"
+                              aria-label="drag"
+                            ></ArrowDownUp>
                           </div>
                         </TableCell>
                         <TableCell className="ps-[10px] pe-[10px] w-[35%]">
@@ -303,16 +355,15 @@ const ImageUploadDialog = ({ editor }: Props) => {
         </div>
         <hr className="w-[106%] translate-x-[-3%]"></hr>
         <div className="flex justify-center items-center">
-          <DialogClose className="rounded-xl text-black bg-white px-5 py-3 hover:bg-neutral-100 disabled:cursor-not-allowed">
-            <span
-              onClick={(e) => {
-                setSelectedImages([]);
-                setIsOpen(false);
-                e.stopPropagation();
-              }}
-            >
-              取消
-            </span>
+          <DialogClose
+            className="rounded-xl text-black bg-white px-5 py-3 hover:bg-neutral-100 disabled:cursor-not-allowed"
+            onClick={(e) => {
+              setSelectedImages([]);
+              setIsOpen(false);
+              e.stopPropagation();
+            }}
+          >
+            <span>取消</span>
           </DialogClose>
           <DialogClose
             className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"

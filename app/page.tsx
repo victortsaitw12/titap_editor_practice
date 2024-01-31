@@ -7,6 +7,9 @@ import MediaContentContext, {
   MediaContentProps,
 } from "../context/mediaContentContext";
 import LinkContext, { LinkProps } from "@/context/linkContext";
+import EditorContentContext, {
+  EditorContentProps,
+} from "@/context/editorContext";
 
 export default function Home() {
   let timer: any;
@@ -18,7 +21,9 @@ export default function Home() {
   const { setLinkIsOpen, linkModify, setLinkModify } = useContext<
     LinkProps | any
   >(LinkContext);
-
+  const { data, setData } = useContext<EditorContentProps | any>(
+    EditorContentContext
+  );
   const updateContent = () => {
     timer = setInterval(() => {
       let now = new Date();
@@ -35,7 +40,7 @@ export default function Home() {
 
   const onChnage = (richText: string) => {
     console.log("text changed");
-    console.log(richText);
+    // console.log(richText);
   };
 
   return (
@@ -48,7 +53,13 @@ export default function Home() {
     >
       <div className="head">
         <div>{updateDt} 已自動儲存</div>
-        <Button>準備發佈</Button>
+        <Button
+          onClick={() => {
+            console.log(data);
+          }}
+        >
+          準備發佈
+        </Button>
       </div>
       <Tiptap description={description} onChange={onChnage} />
     </main>

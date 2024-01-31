@@ -15,8 +15,12 @@ import Instagram from "./custom-extension/extension-instagram";
 import Twitter from "./custom-extension/extension-twitter";
 import CustomLink from "./custom-extension/extension-link";
 import Facebook from "./custom-extension/extension-facebook";
-import { useEffect } from "react";
+import { useContext } from "react";
 import Figure from "./custom-extension/extension-figure";
+import EditorContentContext, {
+  EditorContentProps,
+} from "@/context/editorContext";
+import CustomImage from "./custom-extension/extension-image";
 function Tiptap({
   description,
   onChange,
@@ -24,6 +28,9 @@ function Tiptap({
   description: string;
   onChange: (richText: string) => void;
 }) {
+  const { data, setData } = useContext<EditorContentProps | any>(
+    EditorContentContext
+  );
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -59,7 +66,7 @@ function Tiptap({
         openOnClick: false,
         autolink: false,
       }),
-      Image.configure({
+      CustomImage.configure({
         allowBase64: true,
       }),
       Youtube.configure(),
@@ -77,11 +84,11 @@ function Tiptap({
     },
     onUpdate({ editor }) {
       onChange(editor.getHTML());
+      setData(JSON.stringify(editor.getJSON()));
+      // console.log(editor.getHTML());
+      // console.log(JSON.stringify(editor.getJSON()));
+      // console.log(JSON.parse(JSON.stringify(editor.getJSON())));
     },
-    // onTransaction: ({ editor }) => {
-    //   // const cursorLine = editor.view.state.selection.$anchor.path[1]
-    //   console.log("cursorLine:", editor.view.state.selection.$anchor);
-    // },
   });
 
   const isImageActive = editor ? editor.isActive("image") : false;
@@ -91,9 +98,6 @@ function Tiptap({
   const isLinkActive = editor ? editor.isActive("link") : false;
   const isTwitterActive = editor ? editor.isActive("twitter") : false;
   const isFacebookActive = editor ? editor.isActive("facebook") : false;
-  useEffect(() => {
-    console.log(`tiptap:${isFigureActive}`);
-  }, [isFigureActive]);
   return (
     <div>
       <div className="toolbar mx-auto">

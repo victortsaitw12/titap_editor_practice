@@ -47,3 +47,27 @@ export const deleteNode = (editor: Editor | null, type: string) => {
     }
   }
 };
+
+export const changeNodeClass = (
+  editor: Editor | null,
+  type: string,
+  changeType: string
+) => {
+  if (type === "image") {
+    if (changeType === "fullScreen") {
+      editor?.chain().focus().setImageClass({ customClass: "fullImage" }).run();
+    } else {
+      editor?.chain().focus().setImageClass({ customClass: "" }).run();
+    }
+  } else {
+    if (changeType === "fullScreen") {
+      editor
+        ?.chain()
+        .focus()
+        .setFigureClass({ customClass: "fullFigure" })
+        .run();
+    } else {
+      editor?.chain().focus().setFigureClass({ customClass: "" }).run();
+    }
+  }
+};
