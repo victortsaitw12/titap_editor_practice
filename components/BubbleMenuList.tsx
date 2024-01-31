@@ -28,7 +28,7 @@ function BubbleMenuList({
   isFigureActive,
 }: Props) {
   const [linkValue, setLinkValue] = useState("");
-  const [imageFigureOpen, setImageFigureOpen] = useState<boolean>(true);
+  const [imageFigureOpen, setImageFigureOpen] = useState<boolean>(false);
   const { linkIsOpen, setLinkIsOpen, linkModify, setLinkModify } = useContext<
     LinkProps | any
   >(LinkContext);
@@ -48,12 +48,6 @@ function BubbleMenuList({
     !linkIsOpen &&
     !linkModify &&
     !isLinkActive;
-
-  useEffect(() => {
-    console.log(
-      `isFigureActive is:${isFigureActive},isImageActive is:${isImageActive}`
-    );
-  }, [isFigureActive, isImageActive]);
   if (!editor) {
     return null;
   }
@@ -63,7 +57,9 @@ function BubbleMenuList({
       <BubbleMenu
         className={` ${
           linkIsOpen || linkModify || isLinkActive ? "" : "bubble-menu"
-        } `}
+        } ${imageFigure && imageFigureOpen ? "opacity-0" : ""} ${
+          isFigureActive ? "translate-y-[-1200%]" : ""
+        }`}
         tippyOptions={{ duration: 100 }}
         editor={editor}
       >
@@ -80,9 +76,10 @@ function BubbleMenuList({
         {/* 圖片 menu */}
         {imageFigure && (
           <ImageFigureMenu
-            editor={editor!}
+            editor={editor}
             imageFigureOpen={imageFigureOpen}
             setImageFigureOpen={setImageFigureOpen}
+            isFigureActive={isFigureActive}
           />
         )}
         {/* Youtube,Instagram,Twitter,Facebook menu */}

@@ -1,3 +1,5 @@
+"use client";
+import LinkContext, { LinkProps } from "@/context/linkContext";
 import {
   findChildrenInRange,
   mergeAttributes,
@@ -12,7 +14,6 @@ import {
   PluginKey,
   TextSelection,
 } from "@tiptap/pm/state";
-import { resolve } from "path";
 export interface FigureOptions {
   HTMLAttributes: Record<string, any>;
 }
@@ -103,18 +104,13 @@ export const Figure = Node.create<FigureOptions>({
         tag: "figure [data-figure] figcaption",
         contentElement: "a",
       },
-      // {
-      //   tag: "",
-      //   contentElement: "a",
-      // },
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
     const dataCaption = HTMLAttributes.caption;
     const captionLink = HTMLAttributes.captionLink;
-    console.log(`caption:${dataCaption},link:${captionLink}`);
-    console.log(HTMLAttributes);
+    // console.log(`dataCaption:${dataCaption}, captionLink:${captionLink}`);
     return [
       "figure",
       mergeAttributes(this.options.HTMLAttributes, {
@@ -158,6 +154,7 @@ export const Figure = Node.create<FigureOptions>({
       setFigure:
         ({ caption, link, ...attrs }) =>
         ({ chain }) => {
+          // console.log(`caption:${caption},link:${link}`);
           return (
             chain()
               .insertContent({
@@ -168,23 +165,8 @@ export const Figure = Node.create<FigureOptions>({
               // set cursor at end of caption field
               .command(({ tr, commands }) => {
                 const { doc, selection } = tr;
-                console.log(selection.$anchor.parentOffset);
-                const position = doc
-                  .resolve(selection.to - selection.$anchor.parentOffset)
-                  .end();
                 const startPos = selection.to - selection.$anchor.parentOffset;
                 const endPos = selection.to;
-                console.log(`startPos:${startPos},endPos:${endPos}`);
-                // console.log(doc);
-                console.log(selection);
-                // console.log(position);
-                if (selection.$anchor.parentOffset === 0) {
-                  console.log("just image");
-                  commands.selectParentNode();
-                  console.log("just image1");
-
-                  return commands.setTextSelection(startPos);
-                }
                 return commands.setTextSelection({
                   from: startPos,
                   to: endPos,
@@ -196,7 +178,6 @@ export const Figure = Node.create<FigureOptions>({
       setFigureClass:
         ({ customClass }) =>
         ({ commands }) => {
-          console.log("in here");
           return commands.updateAttributes("figure", { class: customClass });
         },
     };
@@ -219,48 +200,42 @@ export const Figure = Node.create<FigureOptions>({
       new Plugin({
         key: new PluginKey("eventHandler"),
         props: {
-          // handleClick(view, pos, event) {
-          //   const { schema, doc, tr } = view.state;
-          //   console.log("+++++++++++++++++++++");
-          //   // console.log(schema);
-          //   console.log(pos);
-          //   console.log(view.state);
-          //   const attrs = getNodeAttrs(view.state, schema.nodes.figure);
-          //   const range = getNodeRange(doc.resolve(pos), schema.nodes.figure);
-          //   console.log(attrs);
-          //   console.log(range);
-          //   // console.log(doc);
-          //   // console.log(tr);
-          //   // console.log(schema.nodes.figure);
-          //   // console.log(tr.selection);
-          //   // console.log(doc.resolve(pos));
-          //   console.log("Click a Figure");
-          // },
-          handleClickOn: (view, pos, node) => {
-            const { schema, doc, tr } = view.state;
-            console.log("handleClickOn", node.attrs);
-            console.log(pos);
-            console.log(view.state);
-            const attrs = node.attrs;
-            console.log(attrs);
-            if (attrs.captionLink) {
-              console.log("Click a captionLink Figure");
-            } else if (attrs.caption) {
-              console.log("Click a caption Figure");
-            } else if (attrs.src) {
-              console.log("Click a Figure");
-              const start = doc.resolve(pos + 1);
-              // console.log(start);
-              const end = doc.resolve(pos - 1);
-              // console.log(end);
-              const transaction = tr.setSelection(
-                new TextSelection(start, end)
-              );
-              view.dispatch(transaction);
+          handleClick(view, pos, event) {
+            // 確保 event 是 MouseEvent
+            if (event instanceof MouseEvent) {
+              // 獲取點擊位置的 ProseMirror 位置
+              const posInDoc = view.posAtCoords({
+                left: event.clientX,
+                top: event.clientY,
+              });
+              const { schema, doc, tr } = view.state;
+              // console.log(view.state);
+              // console.log("Position in document:", posInDoc);
+              // console.log(posInDoc && doc.resolve(posInDoc.pos));
+              if (posInDoc) {
+                const resolvePosition = doc.resolve(posInDoc.pos);
+                const selectType = resolvePosition.parent.type.name;
+                // console.log(selectType);
+                if (selectType === "figure") {
+                  const start =
+                    resolvePosition.parentOffset === 0
+                      ? posInDoc.pos
+                      : posInDoc.pos - resolvePosition.parentOffset;
+                  const caption = resolvePosition.nodeAfter?.text?.length;
+                  const end =
+                    resolvePosition.parentOffset === 0
+                      ? posInDoc.pos + (caption ? caption : 0)
+                      : posInDoc.pos;
+                  const $start = doc.resolve(start);
+                  const $end = doc.resolve(end);
+                  const transaction = tr.setSelection(
+                    new TextSelection($start, $end)
+                  );
+                  view.dispatch(transaction);
+                  event.stopPropagation();
+                }
+              }
             }
-            const test = view.state.doc.content;
-            console.log(`check value:${test},${typeof test}`);
-            // view.dispatch(pos)
           },
         },
       }),

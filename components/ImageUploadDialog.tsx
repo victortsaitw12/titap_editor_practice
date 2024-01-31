@@ -26,6 +26,7 @@ import { type Editor } from "@tiptap/react";
 import MediaContentContext, {
   MediaContentProps,
 } from "@/context/mediaContentContext";
+import { setNode } from "./custom-extension/extension-figure/utils/function";
 
 type Props = {
   editor: Editor | null;
@@ -79,16 +80,18 @@ const ImageUploadDialog = ({ editor }: Props) => {
   ) => {
     if (editor && images) {
       images.map((item, index) => {
-        editor
-          .chain()
-          .focus()
-          .setFigure({
-            src: item.file,
-            caption: imagesDescription[index]?.caption,
-            alt: imagesDescription[index]?.caption,
-            link: imagesDescription[index]?.link,
-          })
-          .run();
+        if (imagesDescription[index]) {
+          setNode(
+            editor,
+            "figure",
+            item.file,
+            item.alt,
+            imagesDescription[index]?.caption,
+            imagesDescription[index]?.link
+          );
+        } else {
+          setNode(editor, "image", item.file, item.alt);
+        }
       });
       setSelectedImages([]);
       setImagesDescription([]);
@@ -97,12 +100,23 @@ const ImageUploadDialog = ({ editor }: Props) => {
   };
   const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadFiles = e.target.files;
+    let oversizeImage = "";
     if (uploadFiles) {
       for (let i = 0; i < uploadFiles.length; i++) {
         const currentFile = uploadFiles[i];
+        const maxSizeInBytes = 500 * 1024; // 500KB
+
+        if (currentFile.size > maxSizeInBytes) {
+          oversizeImage += currentFile.name;
+          oversizeImage += ",";
+          continue;
+        }
         upload(currentFile)
           .then((res) => addImageToDialog(res, currentFile.name))
           .catch((err) => console.error(err));
+      }
+      if (oversizeImage) {
+        alert("無法上傳" + oversizeImage + "圖片大於500KB");
       }
     }
     return;
@@ -307,21 +321,13 @@ const ImageUploadDialog = ({ editor }: Props) => {
                 ? false
                 : true
             }
+            onClick={(e) => {
+              addImageToEditor(selectedImages, imagesDescription);
+              setIsOpen(false);
+              e.stopPropagation();
+            }}
           >
-            <span
-              onClick={async (e) => {
-                await addImageToEditor(selectedImages, imagesDescription);
-                console.log("test1");
-                setIsOpen(false);
-                console.log("test2");
-                e.stopPropagation();
-                console.log("test3");
-                editor?.commands.createParagraphNear();
-                console.log("test4");
-              }}
-            >
-              確認
-            </span>
+            <span>確認</span>
           </DialogClose>
         </div>
       </DialogContent>

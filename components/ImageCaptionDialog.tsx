@@ -33,6 +33,7 @@ import { type Editor } from "@tiptap/react";
 import MediaContentContext, {
   MediaContentProps,
 } from "@/context/mediaContentContext";
+import { setNode } from "./custom-extension/extension-figure/utils/function";
 
 type ImageCaptionDialogProps = {
   editor: Editor | null;
@@ -48,39 +49,35 @@ const ImageCaptionDialog = ({
   const [imageCaption, setImageCaption] = useState("");
   const [imageLink, setImageLink] = useState("");
   useEffect(() => {
-    const figureAttr = editor && editor.getAttributes("figure");
-    if (figureAttr && figureAttr.alt) {
-      if (figureAttr.alt) {
-        setImageCaption(figureAttr.alt);
+    const figureAttr = editor?.getAttributes("figure");
+    if (figureAttr) {
+      if (figureAttr.caption) {
+        setImageCaption(figureAttr.caption);
       }
       if (figureAttr.captionLink) {
         setImageLink(figureAttr.captionLink);
       }
     }
   }, []);
+
   const handleSetImageCaption = () => {
-    // console.log(`imageCaption:${imageCaption}`);
-    console.log(`imageCaption is: ${imageCaption},imageLink is: ${imageLink}`);
-    const imageSrc = editor?.getAttributes("figure").src;
-    // editor
-    //   ?.chain()
-    //   .focus()
-    //   .updateAttributes("figure", {
-    //     caption: imageCaption,
-    //     captionLink: imageLink,
-    //   })
-    //   .run();
+    const imageSrc = editor?.isActive("figure")
+      ? editor?.getAttributes("figure").src
+      : editor?.isActive("image")
+      ? editor?.getAttributes("image").src
+      : "";
+    const imageAlt = editor?.isActive("figure")
+      ? editor?.getAttributes("figure").alt
+      : editor?.isActive("image")
+      ? editor?.getAttributes("image").alt
+      : "";
     editor?.chain().lift("figure").deleteSelection().run();
-    editor
-      ?.chain()
-      .focus()
-      .setFigure({
-        src: imageSrc,
-        caption: imageCaption,
-        alt: imageCaption,
-        link: imageLink,
-      })
-      .run();
+    if (imageCaption) {
+      setNode(editor, "figure", imageSrc, imageAlt, imageCaption, imageLink);
+    } else {
+      setNode(editor, "image", imageSrc, imageAlt);
+    }
+    setImageFigureOpen(false);
   };
   const linkDisabled = imageCaption.length === 0;
 
@@ -88,9 +85,9 @@ const ImageCaptionDialog = ({
     <Dialog>
       <DialogTrigger
         className="p-[10px]"
-        onClick={() => {
-          console.log("click caption dialog");
-          //   setImageFigureOpen(false);
+        onClick={(e) => {
+          setImageFigureOpen(true);
+          e.stopPropagation();
         }}
       >
         <Pencil />
@@ -113,6 +110,9 @@ const ImageCaptionDialog = ({
               placeholder="請輸入圖片敘述"
               onChange={(e) => {
                 setImageCaption(e.target.value);
+                if (e.target.value === "") {
+                  setImageLink("");
+                }
               }}
             />
           </div>
@@ -131,7 +131,7 @@ const ImageCaptionDialog = ({
                   ? "cursor-not-allowed bg-neutral-200 pointer-events-none"
                   : ""
               }`}
-              value={imageLink}
+              value={imageCaption.length === 0 ? "" : imageLink}
               placeholder="請輸入圖片敘述連結"
               onChange={(e) => {
                 setImageLink(e.target.value);
@@ -153,13 +153,7 @@ const ImageCaptionDialog = ({
           <DialogClose className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400">
             <span
               onClick={(e) => {
-                // editor
-                //   ?.chain()
-                //   .focus()
-                //   .toggleNode("paragraph", "figure", { alt: imageCaption })
-                //   .run();
                 handleSetImageCaption();
-                // e.stopPropagation();
               }}
             >
               確認

@@ -1,27 +1,30 @@
 // ImageFigureMenu.tsx
-import React from "react";
+import React, { useEffect } from "react";
 import { GalleryVertical, Tv2, Trash2 } from "lucide-react";
 import { Editor } from "@tiptap/react";
 import { Toggle } from "../ui/toggle";
 import ImageCaptionDialog from "../ImageCaptionDialog";
+import { deleteNode } from "../custom-extension/extension-figure/utils/function";
 
 interface ImageFigureMenuProps {
   editor: Editor;
   imageFigureOpen: boolean;
   setImageFigureOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isFigureActive: boolean;
 }
 
-const ImageFigureMenu: React.FC<ImageFigureMenuProps> = ({
+const ImageFigureMenu = ({
   editor,
   imageFigureOpen,
   setImageFigureOpen,
-}) => {
+  isFigureActive,
+}: ImageFigureMenuProps) => {
   return (
     <>
       <Toggle
         className="bubble-menu-item"
         size="sm"
-        pressed={true} // 設定 GalleryVertical 的條件
+        pressed={true}
         onPressedChange={() => {
           editor.chain().focus().setFigureClass({ customClass: "" }).run();
         }}
@@ -31,7 +34,7 @@ const ImageFigureMenu: React.FC<ImageFigureMenuProps> = ({
       <Toggle
         className={`bubble-menu-item`}
         size="sm"
-        pressed={true} // 設定 Tv2 的條件
+        pressed={true}
         onPressedChange={() => {
           editor
             .chain()
@@ -50,10 +53,11 @@ const ImageFigureMenu: React.FC<ImageFigureMenuProps> = ({
       <Toggle
         className="bubble-menu-item"
         size="sm"
-        pressed={true} // 設定 Trash2 的條件
+        pressed={true}
         onPressedChange={() => {
-          console.log("點擊這裡刪除圖片");
-          editor.chain().focus().lift("figure").deleteSelection().run();
+          isFigureActive
+            ? deleteNode(editor, "figure")
+            : deleteNode(editor, "image");
         }}
       >
         <Trash2></Trash2>
