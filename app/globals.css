@@ -96,7 +96,7 @@
   background-color: transparent;
   /* width: 50%; */
   text-align: center;
-  padding: 10px 0;
+  /* padding: 5px 0; */
   position: relative;
 }
 .toolbar::after {
@@ -234,8 +234,8 @@ code {
   position: absolute;
   border: 2px solid #ddd;
   border-radius: 10px;
-  top: 60px;
-  left: calc(40% - 15px);
+  top: 40px;
+  left: 0;
 }
 img:hover {
   box-shadow: 0px 0px 0px 2px aqua;
@@ -307,21 +307,8 @@ div[data-facebook] {
   border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
-figure[data-figure] {
-  /* width: calc(740px + calc(var(--embed-border-width) * 2)); */
-  /* height: 100%; */
-  /* border: var(--embed-border-width) solid #ddd; */
-  /* cursor: move !important; */
-  /* width: calc(100vw - 4px); */
-  /* width: 100vw; */
-  /* transform: translateX(-373px); */
-}
+
 figure[data-figure].fullImage {
-  /* width: calc(740px + calc(var(--embed-border-width) * 2)); */
-  /* height: 100%; */
-  /* border: var(--embed-border-width) solid #ddd; */
-  /* cursor: move !important; */
-  /* width: calc(100vw - 4px); */
   width: 100vw;
   transform: translateX(-373px);
 }
@@ -347,6 +334,4 @@ figcaption {
   margin-top: 0.25rem;
   text-align: center;
   padding: 0.5rem;
-  /* border: 2px dashed #0d0d0d20; */
-  /* border-radius: 0.5rem; */
 }

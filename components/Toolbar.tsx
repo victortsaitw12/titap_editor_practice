@@ -67,7 +67,7 @@ function Toolbar({ editor }: Props) {
     // <div className='border border-input bg-transparent rounded-sm'>
     <>
       <div
-        className="ps-[10px] pt-[5px] pe-[6px]"
+        className="ps-[10px] pt-[5px] pe-[6px] relative"
         onClick={(e) => {
           setIsOpen(true);
           e.stopPropagation();
@@ -79,7 +79,7 @@ function Toolbar({ editor }: Props) {
         {isOpen && (
           <div className="mediaContent">
             <ImageUploadDialog editor={editor} />
-            <Toggle
+            {/* <Toggle
               className="bubble-menu-item"
               size="sm"
               pressed={editor.isActive("galleryHorizontal")}
@@ -88,7 +88,7 @@ function Toolbar({ editor }: Props) {
               }}
             >
               <GalleryHorizontal className="h-4 w-4" />
-            </Toggle>
+            </Toggle> */}
             <ImageSearchDialog editor={editor}></ImageSearchDialog>
             <MediaLinkDialog editor={editor}></MediaLinkDialog>
             <Toggle
