@@ -1,33 +1,15 @@
 // ImageUploadDialog.tsx
-import React, {
-  useState,
-  useCallback,
-  useEffect,
-  useContext,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
 import {
-  Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogClose,
-  DialogOverlay,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
-} from "./ui/dialog";
-import {
-  Image,
-  Info,
-  Pencil,
-  Link,
-  ArrowDownUp,
-  Trash,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react";
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "./ui/alert-dialog";
+import { Pencil, Link } from "lucide-react";
 import { type Editor } from "@tiptap/react";
 import { setNode } from "./custom-extension/extension-figure/utils/function";
 
@@ -78,8 +60,8 @@ const ImageCaptionDialog = ({
   const linkDisabled = imageCaption.length === 0;
 
   return (
-    <Dialog>
-      <DialogTrigger
+    <AlertDialog>
+      <AlertDialogTrigger
         className="p-[10px]"
         onClick={(e) => {
           setImageFigureOpen(true);
@@ -87,14 +69,20 @@ const ImageCaptionDialog = ({
         }}
       >
         <Pencil />
-      </DialogTrigger>
-      <DialogContent className="w-[800px] min-h-[400px]">
-        <DialogHeader className="">
-          <DialogTitle>
+      </AlertDialogTrigger>
+      <AlertDialogContent
+        className="w-[800px] min-h-[400px]"
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        style={{ maxWidth: "100vw" }}
+      >
+        <AlertDialogHeader className="">
+          <AlertDialogTitle>
             <span>編輯圖片敘述</span>
-          </DialogTitle>
+          </AlertDialogTitle>
           <hr className="w-[106%] translate-x-[-3%]"></hr>
-        </DialogHeader>
+        </AlertDialogHeader>
         <div className="inputArea flex flex-col justify-center mt-3">
           <p className="text-lg mb-2">圖片敘述</p>
           <div className="flex items-center border border-neutral-400 rounded-md px-3 py-4 mb-4 text-center">
@@ -137,25 +125,29 @@ const ImageCaptionDialog = ({
         </div>
         <hr className="w-[106%] translate-x-[-3%] mt-5"></hr>
         <div className="flex justify-center items-center">
-          <DialogClose
+          <AlertDialogCancel
             className="rounded-xl text-black bg-white px-5 py-3 hover:bg-neutral-100 disabled:cursor-not-allowed"
             onClick={(e) => {
+              const figureAttr = editor?.getAttributes("figure");
+              setImageCaption(figureAttr?.caption || "");
+              setImageLink(figureAttr?.captionLink || "");
+              setImageFigureOpen(false);
               e.stopPropagation();
             }}
           >
             <span>取消</span>
-          </DialogClose>
-          <DialogClose
+          </AlertDialogCancel>
+          <AlertDialogAction
             className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
             onClick={(e) => {
               handleSetImageCaption();
             }}
           >
             <span>確認</span>
-          </DialogClose>
+          </AlertDialogAction>
         </div>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 

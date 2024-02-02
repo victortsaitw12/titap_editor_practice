@@ -86,8 +86,13 @@ export const Figure = Node.create<FigureOptions>({
 
       caption: {
         default: null,
-        parseHTML: (element) =>
-          element.querySelector("img")?.getAttribute("caption"),
+        parseHTML: (element) => {
+          const ele = element as HTMLElement;
+          const caption = ele.lastChild?.firstChild?.textContent;
+          return (
+            element.querySelector("img")?.getAttribute("caption") || caption
+          );
+        },
       },
 
       captionLink: {
@@ -101,8 +106,12 @@ export const Figure = Node.create<FigureOptions>({
   parseHTML() {
     return [
       {
-        tag: "figure [data-figure] figcaption",
+        tag: "figure[data-figure] img figcaption",
         contentElement: "a",
+      },
+      {
+        tag: "div",
+        content: "img small span",
       },
     ];
   },
@@ -110,7 +119,7 @@ export const Figure = Node.create<FigureOptions>({
   renderHTML({ HTMLAttributes }) {
     const dataCaption = HTMLAttributes.caption;
     const captionLink = HTMLAttributes.captionLink;
-    // console.log(`dataCaption:${dataCaption}, captionLink:${captionLink}`);
+    console.log(`dataCaption:${dataCaption}, captionLink:${captionLink}`);
     return [
       "figure",
       mergeAttributes(this.options.HTMLAttributes, {
@@ -120,23 +129,26 @@ export const Figure = Node.create<FigureOptions>({
       }),
       [
         "img",
-        mergeAttributes(HTMLAttributes, {
+        {
+          src: HTMLAttributes.src,
+          alt: HTMLAttributes.alt,
+          title: HTMLAttributes.title,
           draggable: false,
           contenteditable: false,
-          class: "figure",
-        }),
+          class: "figure w-full",
+        },
       ],
       [
         "figcaption",
         {
           contenteditable: "false",
-          class: `${dataCaption ? "" : "hidden"}`,
+          class: `${dataCaption ? "text-sm" : ""}`,
         },
         [
           "a",
           {
             contenteditable: "false",
-            class: `${dataCaption ? "" : "hidden"} ${
+            class: `${dataCaption ? "text-sm" : ""} ${
               captionLink ? "" : "pointer-events-none"
             } caption`,
             style: `${captionLink ? "" : "color:black"}`,
@@ -210,12 +222,9 @@ export const Figure = Node.create<FigureOptions>({
               });
               const { schema, doc, tr } = view.state;
               // console.log(view.state);
-              // console.log("Position in document:", posInDoc);
-              // console.log(posInDoc && doc.resolve(posInDoc.pos));
               if (posInDoc) {
                 const resolvePosition = doc.resolve(posInDoc.pos);
                 const selectType = resolvePosition.parent.type.name;
-                // console.log(selectType);
                 if (selectType === "figure") {
                   const start =
                     resolvePosition.parentOffset === 0

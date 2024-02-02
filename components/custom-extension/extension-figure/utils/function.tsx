@@ -29,6 +29,7 @@ export const setNode = (
       })
       .run();
   }
+  editor?.commands.createParagraphNear();
 };
 
 export const deleteNode = (editor: Editor | null, type: string) => {

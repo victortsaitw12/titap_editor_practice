@@ -68,8 +68,8 @@ export const CustomImage = Node.create<ImageOptions>({
     return [
       {
         tag: this.options.allowBase64
-          ? "div img[src]"
-          : 'div img[src]:not([src^="data:"])',
+          ? "img[src]"
+          : 'img[src]:not([src^="data:"])',
       },
     ];
   },
@@ -77,7 +77,7 @@ export const CustomImage = Node.create<ImageOptions>({
   renderHTML({ HTMLAttributes }) {
     const testclass = HTMLAttributes.class;
     return [
-      "div",
+      "p",
       mergeAttributes(this.options.HTMLAttributes, {
         class: HTMLAttributes.class,
       }),
@@ -87,6 +87,7 @@ export const CustomImage = Node.create<ImageOptions>({
           src: HTMLAttributes.src,
           alt: HTMLAttributes.alt,
           title: HTMLAttributes.title,
+          class: "w-full",
         },
       ],
     ];
