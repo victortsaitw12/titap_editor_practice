@@ -58,13 +58,12 @@ function BubbleMenuList({
         className={` ${
           linkIsOpen || linkModify || isLinkActive ? "" : "bubble-menu"
         } ${imageFigure && imageFigureOpen ? "opacity-0" : ""} ${
-          isFigureActive ? "translate-y-[-1200%]" : ""
+          isFigureActive ? "" : ""
         }`}
         tippyOptions={{ duration: 100 }}
         editor={editor}
       >
         {/* 文字 menu */}
-
         {textBubbleMenu && (
           <TextBubbleMenu
             editor={editor}
@@ -82,6 +81,7 @@ function BubbleMenuList({
             isFigureActive={isFigureActive}
           />
         )}
+
         {/* Youtube,Instagram,Twitter,Facebook menu */}
         {mediaIsActive && <MediaMenu editor={editor} />}
 

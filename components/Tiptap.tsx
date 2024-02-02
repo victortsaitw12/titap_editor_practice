@@ -3,24 +3,28 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Toolbar from "./Toolbar";
+import { Button } from "../components/ui/button";
+
 import BubbleMenuList from "./BubbleMenuList";
 // import FloatingMenuList from "./FloatingMenuList"
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
 import Superscript from "@tiptap/extension-superscript";
 import Subscript from "@tiptap/extension-subscript";
-import Image from "@tiptap/extension-image";
 import Youtube from "@tiptap/extension-youtube";
 import Instagram from "./custom-extension/extension-instagram";
 import Twitter from "./custom-extension/extension-twitter";
 import CustomLink from "./custom-extension/extension-link";
 import Facebook from "./custom-extension/extension-facebook";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import Figure from "./custom-extension/extension-figure";
 import EditorContentContext, {
   EditorContentProps,
 } from "@/context/editorContext";
 import CustomImage from "./custom-extension/extension-image";
+import CustomParagraph from "./custom-extension/extension-paragraph";
+import Small from "./custom-extension/extension-small";
+
 function Tiptap({
   description,
   onChange,
@@ -49,6 +53,7 @@ function Tiptap({
             class: "order-list",
           },
         },
+        paragraph: false,
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
@@ -66,14 +71,14 @@ function Tiptap({
         openOnClick: false,
         autolink: false,
       }),
-      CustomImage.configure({
-        allowBase64: true,
-      }),
+      CustomImage.configure(),
       Youtube.configure(),
       Instagram.configure(),
       Twitter.configure(),
       Facebook.configure(),
       Figure.configure(),
+      CustomParagraph.configure(),
+      Small.configure(),
     ],
     content: description,
     editorProps: {
@@ -85,7 +90,8 @@ function Tiptap({
     onUpdate({ editor }) {
       onChange(editor.getHTML());
       setData(JSON.stringify(editor.getJSON()));
-      // console.log(editor.getHTML());
+
+      console.log(editor.getHTML());
       // console.log(JSON.stringify(editor.getJSON()));
       // console.log(JSON.parse(JSON.stringify(editor.getJSON())));
     },
@@ -98,12 +104,41 @@ function Tiptap({
   const isLinkActive = editor ? editor.isActive("link") : false;
   const isTwitterActive = editor ? editor.isActive("twitter") : false;
   const isFacebookActive = editor ? editor.isActive("facebook") : false;
+  const [updateDt, setUpdateDt] = useState("");
+  let timer: any;
+
+  const updateContent = () => {
+    timer = setInterval(() => {
+      let now = new Date();
+      let hour = now.getHours();
+      let min = now.getMinutes();
+      setUpdateDt(hour + ":" + min);
+    }, 1000);
+  };
+
+  useEffect(() => {
+    updateContent();
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div>
-      <div className="toolbar mx-auto">
-        <Toolbar editor={editor} />
+    <>
+      <div className="w-full fixed top-0 left-0 bg-white z-50">
+        <div className="head">
+          <div>{updateDt} 已自動儲存</div>
+          <Button
+            onClick={() => {
+              console.log(data);
+            }}
+          >
+            準備發佈
+          </Button>
+        </div>
+        <div className="toolbar mx-auto">
+          <Toolbar editor={editor} />
+        </div>
       </div>
-      <div className="container">
+      <div className="container relative z-10">
         <div className="title-wrap">
           <input className="title" type="text" defaultValue={"Title"} />
         </div>
@@ -120,7 +155,7 @@ function Tiptap({
         />
         <EditorContent editor={editor} />
       </div>
-    </div>
+    </>
   );
 }
 
