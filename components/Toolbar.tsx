@@ -11,15 +11,9 @@ import {
   Code2,
   Undo,
   Redo,
-  Image,
   Plus,
-  Link,
-  GalleryHorizontal,
-  FileSearch,
   SeparatorHorizontal,
 } from "lucide-react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
 import { Toggle } from "./ui/toggle";
 import ImageUploadDialog from "./ImageUploadDialog";
 import ImageSearchDialog from "./ImageSearchDialog";
@@ -27,6 +21,7 @@ import MediaContentContext, {
   MediaContentProps,
 } from "../context/mediaContentContext";
 import MediaLinkDialog from "./MediaLinkDialog";
+import CustomTooltip from "./tooltipContent";
 
 type Props = {
   editor: Editor | null;
@@ -36,6 +31,8 @@ function Toolbar({ editor }: Props) {
   const { isOpen, setIsOpen } = useContext<MediaContentProps | any>(
     MediaContentContext
   );
+  // tooltip delayDuration
+  const delayDuration = 0;
 
   const handleDividerClick = useCallback(() => {
     editor?.chain().focus().setHorizontalRule().run();
@@ -73,12 +70,22 @@ function Toolbar({ editor }: Props) {
           e.stopPropagation();
         }}
       >
-        <button>
-          <Plus size={20}></Plus>
-        </button>
+        <CustomTooltip delayDuration={delayDuration} content="多媒體">
+          <button>
+            <Plus size={20}></Plus>
+          </button>
+        </CustomTooltip>
+
         {isOpen && (
           <div className="mediaContent">
-            <ImageUploadDialog editor={editor} />
+            <CustomTooltip
+              delayDuration={delayDuration}
+              content="上傳圖片"
+              side="bottom"
+            >
+              <ImageUploadDialog editor={editor} />
+            </CustomTooltip>
+
             {/* <Toggle
               className="bubble-menu-item"
               size="sm"
@@ -89,115 +96,151 @@ function Toolbar({ editor }: Props) {
             >
               <GalleryHorizontal className="h-4 w-4" />
             </Toggle> */}
-            <ImageSearchDialog editor={editor}></ImageSearchDialog>
-            <MediaLinkDialog editor={editor}></MediaLinkDialog>
-            <Toggle
-              className="bubble-menu-item"
-              size="sm"
-              pressed={editor.isActive("separatorHorizontal")}
-              onPressedChange={handleDividerClick}
+            <CustomTooltip
+              delayDuration={delayDuration}
+              content="圖庫"
+              side="bottom"
             >
-              <SeparatorHorizontal className="h-4 w-4" />
-            </Toggle>
+              <ImageSearchDialog editor={editor}></ImageSearchDialog>
+            </CustomTooltip>
+            <CustomTooltip
+              delayDuration={delayDuration}
+              content=" 嵌入網站"
+              side="bottom"
+            >
+              <MediaLinkDialog editor={editor}></MediaLinkDialog>
+            </CustomTooltip>
+            <CustomTooltip
+              delayDuration={delayDuration}
+              content="分隔線"
+              side="bottom"
+            >
+              <Toggle
+                className="bubble-menu-item"
+                size="sm"
+                pressed={editor.isActive("separatorHorizontal")}
+                onPressedChange={handleDividerClick}
+              >
+                <SeparatorHorizontal className="h-4 w-4" />
+              </Toggle>
+            </CustomTooltip>
           </div>
         )}
       </div>
-
-      <Toggle
-        className="menu-item"
-        size="sm"
-        pressed={editor.isActive("heading", { level: 2 })}
-        onPressedChange={() =>
-          editor.chain().focus().toggleHeading({ level: 2 }).run()
-        }
-      >
-        <Heading2 className="h-4 w-4" />
-      </Toggle>
-      <Toggle
-        className="menu-item"
-        size="sm"
-        pressed={editor.isActive("heading", { level: 3 })}
-        onPressedChange={() =>
-          editor.chain().focus().toggleHeading({ level: 3 }).run()
-        }
-      >
-        <Heading3 className="h-4 w-4" />
-      </Toggle>
-      <Toggle
-        className="menu-item"
-        size="sm"
-        pressed={editor.isActive("blockquote")}
-        onPressedChange={() => editor.chain().focus().toggleBlockquote().run()}
-      >
-        <Quote className="h-4 w-4 text-black" />
-      </Toggle>
-      <Toggle
-        className="menu-item"
-        size="sm"
-        pressed={editor.isActive("codeBlock")}
-        onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}
-      >
-        <Code2 className="h-4 w-4 text-black" />
-      </Toggle>
-      <div
-        className={`${
-          listClicked || orderListClicked ? "cursor-not-allowed" : ""
-        }`}
-      >
+      <CustomTooltip delayDuration={delayDuration} content="大標題">
         <Toggle
-          disabled={listClicked || orderListClicked ? true : false}
-          className="menu-item disabled:bg-neutral-400"
+          className="menu-item"
           size="sm"
-          pressed={editor.isActive("textAlign")}
-          onPressedChange={() => {
-            setTextAlign();
-            editor.chain().focus().setTextAlign(align).run();
-          }}
-        >
-          <AlignCenter className="h-4 w-4" />
-        </Toggle>
-      </div>
-      <div className={`${orderListClicked ? "cursor-not-allowed" : ""}`}>
-        <Toggle
-          disabled={orderListClicked ? true : false}
-          className="menu-item disabled:bg-neutral-400"
-          size="sm"
-          pressed={editor.isActive("bulletList")}
+          pressed={editor.isActive("heading", { level: 2 })}
           onPressedChange={() =>
-            editor.chain().focus().toggleBulletList().run()
+            editor.chain().focus().toggleHeading({ level: 2 }).run()
           }
         >
-          <List className="h-4 w-4" />
+          <Heading2 className="h-4 w-4" />
         </Toggle>
-      </div>
-
-      <div className={`${listClicked ? "cursor-not-allowed" : ""}`}>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="中標題">
         <Toggle
-          disabled={listClicked ? true : false}
-          className="menu-item disabled:bg-neutral-400"
+          className="menu-item"
           size="sm"
-          pressed={editor.isActive("orderedList")}
+          pressed={editor.isActive("heading", { level: 3 })}
           onPressedChange={() =>
-            editor.chain().focus().toggleOrderedList().run()
+            editor.chain().focus().toggleHeading({ level: 3 }).run()
           }
         >
-          <ListOrdered className="h-4 w-4" />
+          <Heading3 className="h-4 w-4" />
         </Toggle>
-      </div>
-
-      <button
-        className="left-seprator"
-        onClick={() => editor.chain().focus().undo().run()}
-        disabled={!editor.can().undo()}
-      >
-        <Undo className="h-4 w-4" />
-      </button>
-      <button
-        onClick={() => editor.chain().focus().redo().run()}
-        disabled={!editor.can().redo()}
-      >
-        <Redo className="h-4 w-4" />
-      </button>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="引言">
+        <Toggle
+          className="menu-item"
+          size="sm"
+          pressed={editor.isActive("blockquote")}
+          onPressedChange={() =>
+            editor.chain().focus().toggleBlockquote().run()
+          }
+        >
+          <Quote className="h-4 w-4" />
+        </Toggle>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="程式碼">
+        <Toggle
+          className="menu-item"
+          size="sm"
+          pressed={editor.isActive("codeBlock")}
+          onPressedChange={() => editor.chain().focus().toggleCodeBlock().run()}
+        >
+          <Code2 className="h-4 w-4" />
+        </Toggle>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="變更對齊">
+        <div
+          className={`${
+            listClicked || orderListClicked ? "cursor-not-allowed" : ""
+          }`}
+        >
+          <Toggle
+            disabled={listClicked || orderListClicked ? true : false}
+            className="menu-item disabled:bg-neutral-400"
+            size="sm"
+            pressed={editor.isActive("textAlign")}
+            onPressedChange={() => {
+              setTextAlign();
+              editor.chain().focus().setTextAlign(align).run();
+            }}
+          >
+            <AlignCenter className="h-4 w-4" />
+          </Toggle>
+        </div>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="項目符號">
+        <div className={`${orderListClicked ? "cursor-not-allowed" : ""}`}>
+          <Toggle
+            disabled={orderListClicked ? true : false}
+            className="menu-item disabled:bg-neutral-400"
+            size="sm"
+            pressed={editor.isActive("bulletList")}
+            onPressedChange={() =>
+              editor.chain().focus().toggleBulletList().run()
+            }
+          >
+            <List className="h-4 w-4" />
+          </Toggle>
+        </div>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="數字項目符號">
+        <div className={`${listClicked ? "cursor-not-allowed" : ""}`}>
+          <Toggle
+            disabled={listClicked ? true : false}
+            className="menu-item disabled:bg-neutral-400"
+            size="sm"
+            pressed={editor.isActive("orderedList")}
+            onPressedChange={() =>
+              editor.chain().focus().toggleOrderedList().run()
+            }
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Toggle>
+        </div>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="復原">
+        <button
+          className={`w-[25px] h-[36px] flex items-center justify-center left-seprator  enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-30`}
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+        >
+          <Undo className={`h-4 w-4 `} />
+        </button>
+      </CustomTooltip>
+      <CustomTooltip delayDuration={delayDuration} content="取消復原">
+        <button
+          className={`w-[25px] h-[36px] flex items-center justify-center  enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-30`}
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+        >
+          <Redo className="h-4 w-4" />
+        </button>
+      </CustomTooltip>
     </>
   );
 }
