@@ -62,8 +62,12 @@ export const Figure = Node.create<FigureOptions>({
     return {
       src: {
         default: null,
-        parseHTML: (element) =>
-          element.querySelector("img")?.getAttribute("src"),
+        parseHTML: (element) => {
+          // for gallery domain
+          const ele = element as HTMLElement;
+          const src = ele.firstChild as HTMLImageElement;
+          return element.querySelector("img")?.getAttribute("src");
+        },
       },
 
       alt: {
@@ -110,8 +114,12 @@ export const Figure = Node.create<FigureOptions>({
         contentElement: "a",
       },
       {
-        tag: "div",
-        content: "img small span",
+        tag: "div img",
+        content: "small span",
+      },
+      {
+        tag: "p",
+        content: "img span",
       },
     ];
   },

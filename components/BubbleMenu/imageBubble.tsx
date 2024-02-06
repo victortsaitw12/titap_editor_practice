@@ -1,5 +1,5 @@
 // ImageFigureMenu.tsx
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { GalleryVertical, Tv2, Trash2 } from "lucide-react";
 import { Editor } from "@tiptap/react";
 import { Toggle } from "../ui/toggle";
@@ -8,6 +8,9 @@ import {
   changeNodeClass,
   deleteNode,
 } from "../custom-extension/extension-figure/utils/function";
+import EditorContentContext, {
+  EditorContentProps,
+} from "@/context/editorContext";
 
 interface ImageFigureMenuProps {
   editor: Editor;
@@ -22,6 +25,31 @@ const ImageFigureMenu = ({
   setImageFigureOpen,
   isFigureActive,
 }: ImageFigureMenuProps) => {
+  const { editorImages, setEditorImages } = useContext<
+    EditorContentProps | any
+  >(EditorContentContext);
+  const handleRemoveImage = () => {
+    const attrs = isFigureActive
+      ? editor?.getAttributes("figure")
+      : editor?.getAttributes("image");
+    let attrsIndex = 0;
+    editorImages.map((item: any, index: any) => {
+      if (item.alt === attrs.alt) {
+        attrsIndex = index;
+        // console.log(`index:${index},name:${item.alt}`);
+        return;
+      }
+    });
+    if (attrsIndex) {
+      setEditorImages((prev: any) => {
+        const tmpImages = [...prev];
+        tmpImages.splice(attrsIndex, 1);
+        return tmpImages;
+      });
+    }
+    isFigureActive ? deleteNode(editor, "figure") : deleteNode(editor, "image");
+  };
+
   return (
     <>
       <Toggle
@@ -62,11 +90,7 @@ const ImageFigureMenu = ({
         className="bubble-menu-item"
         size="sm"
         pressed={true}
-        onPressedChange={() => {
-          isFigureActive
-            ? deleteNode(editor, "figure")
-            : deleteNode(editor, "image");
-        }}
+        onPressedChange={handleRemoveImage}
       >
         <Trash2></Trash2>
       </Toggle>

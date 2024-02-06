@@ -5,11 +5,9 @@ import {
   DialogTrigger,
   DialogContent,
   DialogClose,
-  DialogOverlay,
   DialogHeader,
-  DialogFooter,
   DialogTitle,
-  DialogDescription,
+  DialogFooter,
 } from "./ui/dialog";
 import { Table, TableBody, TableRow, TableCell } from "./ui/table";
 import {
@@ -21,12 +19,19 @@ import {
   Trash,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
 } from "lucide-react";
 import { type Editor } from "@tiptap/react";
 import MediaContentContext, {
   MediaContentProps,
 } from "@/context/mediaContentContext";
-import { setNode } from "./custom-extension/extension-figure/utils/function";
+import {
+  setNode,
+  upload,
+} from "./custom-extension/extension-figure/utils/function";
+import EditorContentContext, {
+  EditorContentProps,
+} from "@/context/editorContext";
 
 type Props = {
   editor: Editor | null;
@@ -37,7 +42,7 @@ const ImageUploadDialog = ({ editor }: Props) => {
     { disabled: boolean }[]
   >([{ disabled: true }]);
   const [selectedImages, setSelectedImages] = useState<
-    { file: string; alt: string }[]
+    { file: string; alt: string; oversize: boolean; loading: boolean }[]
   >([]);
   const [imagesDescription, setImagesDescription] = useState<
     { caption: string; link: string }[]
@@ -45,83 +50,52 @@ const ImageUploadDialog = ({ editor }: Props) => {
   const { setIsOpen } = useContext<MediaContentProps | any>(
     MediaContentContext
   );
+  const { setEditorImages } = useContext<EditorContentProps | any>(
+    EditorContentContext
+  );
+  const [imageLoading, setImageLoading] = useState<boolean>(true);
 
-  const upload = (file: File) => {
-    return new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imageURL = event.target?.result as string;
-        resolve(imageURL);
-      };
-      reader.onerror = (error) => {
-        reject(error);
-      };
-      reader.readAsDataURL(file);
-    });
+  const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadFiles = e.target.files;
+    if (uploadFiles) {
+      for (let i = 0; i < uploadFiles.length; i++) {
+        const currentFile = uploadFiles[i];
+        upload(currentFile)
+          .then((res) =>
+            addImageToDialog(res, currentFile.name, currentFile.size)
+          )
+          .catch((err) => console.error(err));
+      }
+    }
+    return;
   };
-  const addImageToDialog = (url: string, altText: string) => {
-    setSelectedImages((prevImages) => [
-      ...prevImages,
-      {
-        file: url,
-        alt: altText,
-      },
-    ]);
+
+  const addImageToDialog = (url: string, altText: string, size: number) => {
+    console.log("addImageToDialog");
+    const maxSizeInBytes = 200 * 1024; // 200KB
+    setSelectedImages((prevImages) => {
+      return [
+        ...prevImages,
+        {
+          file: url,
+          alt: altText,
+          oversize: size > maxSizeInBytes,
+          loading: true,
+        },
+      ];
+    });
     setImageLinkDisabled((prevImages) => [
       ...prevImages,
       {
         disabled: true,
       },
     ]);
+    setTimeout(() => {
+      setImageLoading(false);
+    }, 3000);
   };
-  const addImageToEditor = (
-    images: { file: string; alt: string }[],
-    imagesDescription: { caption: string; link: string }[]
-  ) => {
-    if (editor && images) {
-      images.map((item, index) => {
-        if (imagesDescription[index]) {
-          setNode(
-            editor,
-            "figure",
-            item.file,
-            item.alt,
-            imagesDescription[index]?.caption,
-            imagesDescription[index]?.link
-          );
-        } else {
-          setNode(editor, "image", item.file, item.alt);
-        }
-      });
-      setSelectedImages([]);
-      setImagesDescription([]);
-      setImageLinkDisabled([{ disabled: true }]);
-    }
-  };
-  const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadFiles = e.target.files;
-    let oversizeImage = "";
-    if (uploadFiles) {
-      for (let i = 0; i < uploadFiles.length; i++) {
-        const currentFile = uploadFiles[i];
-        const maxSizeInBytes = 500 * 1024; // 500KB
 
-        if (currentFile.size > maxSizeInBytes) {
-          oversizeImage += currentFile.name;
-          oversizeImage += ",";
-          continue;
-        }
-        upload(currentFile)
-          .then((res) => addImageToDialog(res, currentFile.name))
-          .catch((err) => console.error(err));
-      }
-      if (oversizeImage) {
-        alert("無法上傳" + oversizeImage + "圖片大於500KB");
-      }
-    }
-    return;
-  };
-  const handleImageLink = (
+  const handleImageCaption = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
@@ -145,7 +119,7 @@ const ImageUploadDialog = ({ editor }: Props) => {
     };
     setImageLinkDisabled(updatedImageLinkDisabled);
   };
-  const handleImageLinkValue = (
+  const handleImageLink = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number
   ) => {
@@ -164,22 +138,11 @@ const ImageUploadDialog = ({ editor }: Props) => {
       return newImages;
     });
   };
-  useEffect(() => {
-    selectedImages.map((item, index) => {
-      console.log(
-        `index:${index},src:${item.file ? "Yes" : "No"},alt:${
-          item.alt
-        },caption:${imagesDescription[index]?.caption},link:${
-          imagesDescription[index]?.link
-        }`
-      );
-    });
-  }, [selectedImages, imagesDescription]);
 
   // 拖曳列元素
-  const [tmpImages, setTmpImages] = useState<{ file: string; alt: string }[]>(
-    []
-  );
+  const [tmpImages, setTmpImages] = useState<
+    { file: string; alt: string; oversize: boolean; loading: boolean }[]
+  >([]);
   const handleDragStart = (
     index: number,
     e: React.DragEvent<HTMLDivElement>
@@ -193,9 +156,6 @@ const ImageUploadDialog = ({ editor }: Props) => {
     e.preventDefault();
     const draggedOverIndex = index;
     const draggedIndex = Number(e.dataTransfer.getData("text/plain"));
-    console.log(
-      `draggedIndex:${draggedIndex},draggedOverIndex:${draggedOverIndex}`
-    );
 
     if (draggedIndex !== draggedOverIndex) {
       // 更新 selectedImages 的順序
@@ -208,23 +168,73 @@ const ImageUploadDialog = ({ editor }: Props) => {
   const handleDragEnd = () => {
     setSelectedImages(tmpImages);
   };
+
+  // 新增至編輯器
+  const addImageToEditor = (
+    images: { file: string; alt: string }[],
+    imagesDescription: { caption: string; link: string }[]
+  ) => {
+    if (editor && images) {
+      images.map((item, index) => {
+        if (imagesDescription[index]) {
+          setNode(
+            editor,
+            "figure",
+            item.file,
+            item.alt,
+            imagesDescription[index]?.caption,
+            imagesDescription[index]?.link
+          );
+        } else {
+          setNode(editor, "image", item.file, item.alt);
+        }
+        setEditorImages((prevImages: any) => [
+          ...prevImages,
+          {
+            file: item.file,
+            alt: item.alt,
+          },
+        ]);
+      });
+      setSelectedImages([]);
+      setImagesDescription([]);
+      setImageLinkDisabled([{ disabled: true }]);
+    }
+  };
+  useEffect(() => {
+    selectedImages.map((item, index) => {
+      if (item.loading) {
+        setTimeout(() => {
+          const updatedImages = [...selectedImages];
+          updatedImages[index] = { ...item, loading: false };
+          setSelectedImages(updatedImages);
+        }, 3000);
+      }
+    });
+  }, [selectedImages]);
+
   return (
     <Dialog>
       <DialogTrigger className="p-[10px]">
         <Image aria-label="image" className="w-4 h-4" />
       </DialogTrigger>
 
-      <DialogContent className="w-[800px] min-h-[580px]">
+      <DialogContent className="w-[800px] mt-2">
         <DialogHeader className="">
           <DialogTitle>
             <span>上傳圖片</span>
           </DialogTitle>
           <hr className="w-[106%] translate-x-[-3%]"></hr>
         </DialogHeader>
-        <div>
+        <div
+          className="overflow-y-auto"
+          style={{ maxHeight: "calc(100vh - 220px)" }}
+        >
           <div
             className={`uploadImageArea w-[100%] ${
-              selectedImages.length > 0 ? "h-[175px] mt-3" : "h-[290px] mt-5"
+              selectedImages.length > 0
+                ? "min-h-[175px] mt-3"
+                : "min-h-[290px] mt-5"
             }  border-dashed border-2 rounded-lg mb-3 relative`}
           >
             <div className="absolute top-[50%] left-[50%] translate-y-[-50%] translate-x-[-50%] flex flex-col items-center">
@@ -270,7 +280,7 @@ const ImageUploadDialog = ({ editor }: Props) => {
             )}
           </div>
           {selectedImages.length > 0 && <hr></hr>}
-          <div className={"max-h-[310px] overflow-y-scroll overflow-x-hidden"}>
+          <div className={"overflow-x-hidden"}>
             <Table>
               <TableBody>
                 {selectedImages.map((image, index) => (
@@ -281,7 +291,9 @@ const ImageUploadDialog = ({ editor }: Props) => {
                           {index + 1}
                         </TableCell>
                         <TableCell
-                          className="px-0 hover:cursor-pointer"
+                          className={`px-0 hover:cursor-pointer ${
+                            image.loading && "opacity-50 cursor-not-allowed"
+                          }`}
                           draggable
                           onDragStart={(e) => handleDragStart(index, e)}
                           onDragOver={(e) => handleDragOver(index, e)}
@@ -300,7 +312,7 @@ const ImageUploadDialog = ({ editor }: Props) => {
                             <input
                               placeholder="請輸入圖片敘述"
                               className="border-0 focus:border-0 ms-2 w-[75%] outline-none"
-                              onChange={(e) => handleImageLink(e, index)}
+                              onChange={(e) => handleImageCaption(e, index)}
                             />
                           </div>
                         </TableCell>
@@ -327,18 +339,53 @@ const ImageUploadDialog = ({ editor }: Props) => {
                                   : ""
                               } outline-none`}
                               disabled={imageLinkDisabled[index]?.disabled}
-                              onChange={(e) => handleImageLinkValue(e, index)}
+                              onChange={(e) => handleImageLink(e, index)}
                             />
                           </div>
                         </TableCell>
                         <TableCell className="ps-0 pe-[10px]">
-                          <CheckCircle2 color="green"></CheckCircle2>
+                          {image.loading ? (
+                            "上傳中"
+                          ) : image.oversize ? (
+                            <AlertCircle color="#ff9500"></AlertCircle>
+                          ) : (
+                            <CheckCircle2 color="green"></CheckCircle2>
+                          )}
                         </TableCell>
                         <TableCell className="px-0">
-                          <img src={image.file} alt={image.alt} className="" />
+                          {image.loading ? (
+                            <div className="flex justify-center">
+                              <svg
+                                aria-hidden="true"
+                                className="h-5 w-5 animate-spin fill-white px-auto"
+                                viewBox="0 0 100 100"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                                  fill="currentColor"
+                                />
+                                <path
+                                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                                  fill="currentFill"
+                                />
+                              </svg>
+                            </div>
+                          ) : (
+                            <img
+                              src={image.file}
+                              alt={image.alt}
+                              className=""
+                            />
+                          )}
                         </TableCell>
                         <TableCell className="pe-0 ps-[10px]">
-                          <div className="border rounded-md p-2 border-neutral-400">
+                          <div
+                            className={`border rounded-md p-2 border-neutral-400 max-w-[42px] ${
+                              image.loading && "opacity-50 pointer-events-none"
+                            }`}
+                          >
                             <Trash
                               className="cursor-pointer"
                               onClick={() => handleTrashClick(index)}
@@ -352,6 +399,14 @@ const ImageUploadDialog = ({ editor }: Props) => {
               </TableBody>
             </Table>
           </div>
+          {selectedImages.filter((item) => item.oversize === true).length > 0 &&
+            selectedImages.filter((item) => item.loading === false).length >
+              0 && (
+              <div className="flex items-center">
+                <AlertCircle color="#ff9500" size={20}></AlertCircle>
+                <span className="ms-1 text-neutral-500">該圖檔大於200KB</span>
+              </div>
+            )}
         </div>
         <hr className="w-[106%] translate-x-[-3%]"></hr>
         <div className="flex justify-center items-center">
@@ -368,9 +423,9 @@ const ImageUploadDialog = ({ editor }: Props) => {
           <DialogClose
             className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
             disabled={
-              selectedImages.length > 0 && selectedImages.length <= 10
-                ? false
-                : true
+              selectedImages.length === 0 ||
+              selectedImages.length > 10 ||
+              selectedImages.filter((item) => item.loading === true).length > 0
             }
             onClick={(e) => {
               addImageToEditor(selectedImages, imagesDescription);

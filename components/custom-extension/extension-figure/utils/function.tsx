@@ -1,4 +1,9 @@
+"use client";
+import EditorContentContext, {
+  EditorContentProps,
+} from "@/context/editorContext";
 import { Editor } from "@tiptap/react";
+import { useContext } from "react";
 
 export const setNode = (
   editor: Editor | null,
@@ -71,4 +76,46 @@ export const changeNodeClass = (
       editor?.chain().focus().setFigureClass({ customClass: "" }).run();
     }
   }
+};
+
+export const compressImage = (image: any, scale: number, factor: number) => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const cvWidth = image.width * (1 - scale + factor);
+  const cvHeight = image.height * (1 - scale + factor);
+  canvas.width = cvWidth;
+  canvas.height = cvHeight;
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  // 取得壓縮後的Data URL
+  return canvas.toDataURL("image/jpeg");
+};
+
+export const upload = (file: File) => {
+  const fileSize = file.size / 1024; //KB
+  const maxSize = 200;
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      console.log(`fileSize:${fileSize}`);
+      if (fileSize > 200) {
+        const scale = (fileSize - maxSize) / fileSize;
+        const factor = 0.18;
+        const img = document.createElement("img");
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const compressedDataURL = compressImage(img, scale, factor);
+
+          resolve(compressedDataURL);
+        };
+      } else {
+        const imageURL = event.target?.result as string;
+        resolve(imageURL);
+      }
+    };
+    reader.onerror = (error) => {
+      reject(error);
+    };
+    reader.readAsDataURL(file);
+  });
 };

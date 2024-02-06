@@ -225,7 +225,8 @@ code {
   left: 0;
   background-color: white;
 }
-img:hover {
+img:hover,
+figure[data-figure]:hover {
   box-shadow: 0px 0px 0px 2px aqua;
 }
 .custom-hr {
@@ -301,11 +302,9 @@ figure[data-figure].fullFigure,
   height: 100%;
   transform: translateX(-373px);
 }
-.figure:hover {
+.figure:hover,
+td img:hover {
   box-shadow: none;
-}
-figure[data-figure]:hover {
-  box-shadow: 0px 0px 0px 2px aqua;
 }
 /* Code for Firefox */
 .custom-a::-moz-selection,
