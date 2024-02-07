@@ -1,5 +1,5 @@
 // ImageUploadDialog.tsx
-import React, { useState, useCallback, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Dialog,
   DialogTrigger,
@@ -7,7 +7,6 @@ import {
   DialogClose,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "./ui/dialog";
 import { Table, TableBody, TableRow, TableCell } from "./ui/table";
 import {
@@ -32,12 +31,14 @@ import {
 import EditorContentContext, {
   EditorContentProps,
 } from "@/context/editorContext";
+import CustomTooltip from "./tooltipContent";
 
 type Props = {
   editor: Editor | null;
+  delayDuration: number;
 };
 
-const ImageUploadDialog = ({ editor }: Props) => {
+const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
   const [imageLinkDisabled, setImageLinkDisabled] = useState<
     { disabled: boolean }[]
   >([{ disabled: true }]);
@@ -215,9 +216,15 @@ const ImageUploadDialog = ({ editor }: Props) => {
 
   return (
     <Dialog>
-      <DialogTrigger className="p-[10px]">
-        <Image aria-label="image" className="w-4 h-4" />
-      </DialogTrigger>
+      <CustomTooltip
+        delayDuration={delayDuration}
+        content="上傳圖片"
+        side="bottom"
+      >
+        <DialogTrigger className="p-[10px]">
+          <Image aria-label="image" className="w-4 h-4" />
+        </DialogTrigger>
+      </CustomTooltip>
 
       <DialogContent className="w-[800px] mt-2">
         <DialogHeader className="">

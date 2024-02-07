@@ -3,30 +3,26 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
-  DialogClose,
-  DialogOverlay,
   DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
 } from "./ui/dialog";
 import { Link, AlertTriangle } from "lucide-react";
 import { type Editor } from "@tiptap/react";
 import { Table, TableBody, TableRow, TableCell } from "./ui/table";
-import React, { useState, useCallback, useEffect, useContext } from "react";
-import { Skeleton } from "./ui/skeleton";
+import React, { useState } from "react";
 import {
   FACEBOOK_POST_REGEX,
   FACEBOOK_VIDEO_REGEX,
 } from "./custom-extension/extension-facebook";
 import { TWITTER_REGEX } from "./custom-extension/extension-twitter";
 import { INSTAGRAM_REGEX } from "./custom-extension/extension-instagram";
+import CustomTooltip from "./tooltipContent";
 
 type Props = {
   editor: Editor | null;
+  delayDuration: number;
 };
 
-const MediaLinkDialog = ({ editor }: Props) => {
+const MediaLinkDialog = ({ editor, delayDuration }: Props) => {
   const [mediaLinkValue, setMediaLinkValue] = useState("");
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
   const [mediaLinkCheck, setMediaLinkCheck] = useState(true);
@@ -71,16 +67,23 @@ const MediaLinkDialog = ({ editor }: Props) => {
 
   return (
     <Dialog>
-      <DialogTrigger
-        className="p-[10px]"
-        onClick={() => {
-          setMediaDialogOpen(true);
-          setMediaLinkValue("");
-          setMediaLinkCheck(true);
-        }}
+      <CustomTooltip
+        delayDuration={delayDuration}
+        content="嵌入網站"
+        side="bottom"
       >
-        <Link className="w-4 h-4" />
-      </DialogTrigger>
+        <DialogTrigger
+          className="p-[10px]"
+          onClick={() => {
+            setMediaDialogOpen(true);
+            setMediaLinkValue("");
+            setMediaLinkCheck(true);
+          }}
+        >
+          <Link className="w-4 h-4" />
+        </DialogTrigger>
+      </CustomTooltip>
+
       {mediaDialogOpen && (
         <DialogContent className="w-[800px] min-h-[500px]">
           <DialogHeader className="h-[30px]">

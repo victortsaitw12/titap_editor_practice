@@ -23,7 +23,7 @@ const CustomTooltip = ({
   return (
     <TooltipProvider>
       <Tooltip delayDuration={delayDuration}>
-        <TooltipTrigger>{children}</TooltipTrigger>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent side={side === "bottom" ? "bottom" : "top"}>
           {content}
         </TooltipContent>

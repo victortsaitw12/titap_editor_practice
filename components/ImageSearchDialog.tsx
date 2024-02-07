@@ -6,24 +6,22 @@ import {
   Dialog,
   DialogTrigger,
   DialogContent,
-  DialogClose,
-  DialogOverlay,
   DialogHeader,
-  DialogFooter,
   DialogTitle,
-  DialogDescription,
 } from "./ui/dialog";
 import { FileSearch } from "lucide-react";
 import { type Editor } from "@tiptap/react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./ui/tabs";
 import Giphy from "./dialogContent/ImageSearch/Giphy";
 import Unsplash from "./dialogContent/ImageSearch/Unsplash";
+import CustomTooltip from "./tooltipContent";
 
 type Props = {
   editor: Editor | null;
+  delayDuration: number;
 };
 
-const ImageSearchDialog = ({ editor }: Props) => {
+const ImageSearchDialog = ({ editor, delayDuration }: Props) => {
   const [dialogIsOpen, setDialogIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState("0");
 
@@ -41,15 +39,18 @@ const ImageSearchDialog = ({ editor }: Props) => {
 
   return (
     <Dialog>
-      <DialogTrigger
-        className="p-[10px]"
-        onClick={() => {
-          setDialogIsOpen(true);
-          clearSearchValue();
-        }}
-      >
-        <FileSearch className="w-4 h-4" />
-      </DialogTrigger>
+      <CustomTooltip delayDuration={delayDuration} content="圖庫" side="bottom">
+        <DialogTrigger
+          className="p-[10px]"
+          onClick={() => {
+            setDialogIsOpen(true);
+            clearSearchValue();
+          }}
+        >
+          <FileSearch className="w-4 h-4" />
+        </DialogTrigger>
+      </CustomTooltip>
+
       {dialogIsOpen && (
         <DialogContent className="dialogContent w-[800px] overflow-y-scroll">
           <DialogHeader className="">
@@ -58,7 +59,6 @@ const ImageSearchDialog = ({ editor }: Props) => {
             </DialogTitle>
             <hr className="w-[106%] translate-x-[-3%]"></hr>
           </DialogHeader>
-          {/* <DialogDescription> */}
           <Tabs
             value={activeIndex}
             onValueChange={setActiveIndex}
@@ -117,7 +117,6 @@ const ImageSearchDialog = ({ editor }: Props) => {
               ></Giphy>
             </TabsContent>
           </Tabs>
-          {/* </DialogDescription> */}
         </DialogContent>
       )}
     </Dialog>

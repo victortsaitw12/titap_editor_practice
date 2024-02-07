@@ -78,13 +78,7 @@ function Toolbar({ editor }: Props) {
 
         {isOpen && (
           <div className="mediaContent">
-            <CustomTooltip
-              delayDuration={delayDuration}
-              content="上傳圖片"
-              side="bottom"
-            >
-              <ImageUploadDialog editor={editor} />
-            </CustomTooltip>
+            <ImageUploadDialog editor={editor} delayDuration={delayDuration} />
 
             {/* <Toggle
               className="bubble-menu-item"
@@ -96,20 +90,16 @@ function Toolbar({ editor }: Props) {
             >
               <GalleryHorizontal className="h-4 w-4" />
             </Toggle> */}
-            <CustomTooltip
+
+            <ImageSearchDialog
+              editor={editor}
               delayDuration={delayDuration}
-              content="圖庫"
-              side="bottom"
-            >
-              <ImageSearchDialog editor={editor}></ImageSearchDialog>
-            </CustomTooltip>
-            <CustomTooltip
+            ></ImageSearchDialog>
+
+            <MediaLinkDialog
+              editor={editor}
               delayDuration={delayDuration}
-              content=" 嵌入網站"
-              side="bottom"
-            >
-              <MediaLinkDialog editor={editor}></MediaLinkDialog>
-            </CustomTooltip>
+            ></MediaLinkDialog>
             <CustomTooltip
               delayDuration={delayDuration}
               content="分隔線"
