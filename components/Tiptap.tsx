@@ -24,8 +24,8 @@ import EditorContentContext, {
 import CustomImage from "./custom-extension/extension-image";
 import CustomParagraph from "./custom-extension/extension-paragraph";
 import Small from "./custom-extension/extension-small";
-// import EventExtension from "./custom-extension/extension-event";
-// import CustomYoutube from "./custom-extension/extension-youtube";
+import EventExtension from "./custom-extension/extension-event";
+import CustomYoutube from "./custom-extension/extension-youtube";
 
 function Tiptap({
   description,
@@ -74,14 +74,14 @@ function Tiptap({
         autolink: false,
       }),
       CustomImage.configure(),
-      Youtube.configure(),
+      CustomYoutube.configure(),
       Instagram.configure(),
       Twitter.configure(),
       Facebook.configure(),
       Figure.configure(),
       CustomParagraph.configure(),
       Small.configure(),
-      // EventExtension.configure(),
+      EventExtension.configure(),
     ],
     content: description,
     editorProps: {
