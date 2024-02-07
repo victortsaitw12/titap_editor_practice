@@ -138,6 +138,7 @@ const Giphy = ({
                         .setImage({
                           src: item.images.fixed_height_small.url,
                           alt: item.title,
+                          fileName: item.id,
                         })
                         .run();
                     clearSearchValue();

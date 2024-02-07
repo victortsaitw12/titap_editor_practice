@@ -137,6 +137,7 @@ const Unsplash = ({
                         .setImage({
                           src: item.urls.regular,
                           alt: item.description,
+                          fileName: item.id,
                         })
                         .run();
                     clearSearchValue();

@@ -24,6 +24,8 @@ import EditorContentContext, {
 import CustomImage from "./custom-extension/extension-image";
 import CustomParagraph from "./custom-extension/extension-paragraph";
 import Small from "./custom-extension/extension-small";
+// import EventExtension from "./custom-extension/extension-event";
+// import CustomYoutube from "./custom-extension/extension-youtube";
 
 function Tiptap({
   description,
@@ -32,9 +34,9 @@ function Tiptap({
   description: string;
   onChange: (richText: string) => void;
 }) {
-  const { data, setData } = useContext<EditorContentProps | any>(
-    EditorContentContext
-  );
+  const { data, setData, editorImages, setEditorImages } = useContext<
+    EditorContentProps | any
+  >(EditorContentContext);
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -79,6 +81,7 @@ function Tiptap({
       Figure.configure(),
       CustomParagraph.configure(),
       Small.configure(),
+      // EventExtension.configure(),
     ],
     content: description,
     editorProps: {
@@ -91,7 +94,7 @@ function Tiptap({
       onChange(editor.getHTML());
       setData(JSON.stringify(editor.getJSON()));
 
-      console.log(editor.getHTML());
+      // console.log(editor.getHTML());
       // console.log(JSON.stringify(editor.getJSON()));
       // console.log(JSON.parse(JSON.stringify(editor.getJSON())));
     },
@@ -120,7 +123,64 @@ function Tiptap({
     updateContent();
     return () => clearInterval(timer);
   }, []);
+  const compressOverSizeImage = () => {
+    editorImages.map(
+      (
+        item: {
+          file: string;
+          alt?: string;
+          size: number;
+        },
+        index: number
+      ) => {
+        const fileSize = item.size / 1024; //KB
+        const maxSize = 200;
+        if (fileSize > maxSize) {
+          // FileReader
+          // new Promise<string>((resolve, reject) => {
+          //   if (fileSize > maxSize) {
+          //     const scale = (fileSize - maxSize) / fileSize;
+          //     const factor = 0.18;
+          //     const img = document.createElement("img");
+          //     console.log(typeof item.file);
+          //     img.src = item.file as string;
+          //     img.onload = async () => {
+          //       compressedDataURL = await compressImage(img, scale, factor);
+          //       resolve(compressedDataURL);
+          //     };
+          //   }
+          // }).then((compressedDataURL) => {
+          //   console.log(`test:${(item.file as string) === compressedDataURL}`);
+          //   editorImages[index].file = compressedDataURL;
+          // });
 
+          // Blob
+          const scale = (fileSize - maxSize) / fileSize;
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+          const factor = 0.18;
+          const img = document.createElement("img");
+          img.src = item.file as string;
+          img.onload = async () => {
+            const cvWidth = img.width * (1 - scale + factor);
+            const cvHeight = img.height * (1 - scale + factor);
+            canvas.width = cvWidth;
+            canvas.height = cvHeight;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(function (blob) {
+              const newEditorImages = [...editorImages];
+              const newBlobUrl = blob && URL.createObjectURL(blob);
+              newEditorImages[index].file = newBlobUrl;
+              newEditorImages[index].name = newBlobUrl?.slice(-36);
+              newEditorImages[index].size = blob?.size;
+              newEditorImages[index].blob = blob;
+              setEditorImages(newEditorImages);
+            }, "image/jpeg" || "image/png");
+          };
+        }
+      }
+    );
+  };
   return (
     <>
       <div className="w-full fixed top-0 left-0 bg-white z-50">
@@ -128,7 +188,8 @@ function Tiptap({
           <div>{updateDt} 已自動儲存</div>
           <Button
             onClick={() => {
-              console.log(data);
+              // console.log(data);
+              compressOverSizeImage();
             }}
           >
             準備發佈

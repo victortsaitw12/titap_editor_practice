@@ -43,7 +43,15 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
     { disabled: boolean }[]
   >([{ disabled: true }]);
   const [selectedImages, setSelectedImages] = useState<
-    { file: string; alt: string; oversize: boolean; loading: boolean }[]
+    {
+      file: string;
+      name: string;
+      alt?: string;
+      oversize: boolean;
+      loading: boolean;
+      size: number;
+      blob: Blob;
+    }[]
   >([]);
   const [imagesDescription, setImagesDescription] = useState<
     { caption: string; link: string }[]
@@ -54,34 +62,69 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
   const { setEditorImages } = useContext<EditorContentProps | any>(
     EditorContentContext
   );
-  const [imageLoading, setImageLoading] = useState<boolean>(true);
 
   const handleAddImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadFiles = e.target.files;
+    // console.log(e.target.files);
     if (uploadFiles) {
       for (let i = 0; i < uploadFiles.length; i++) {
         const currentFile = uploadFiles[i];
-        upload(currentFile)
-          .then((res) =>
-            addImageToDialog(res, currentFile.name, currentFile.size)
-          )
-          .catch((err) => console.error(err));
+        const imageUrl = URL.createObjectURL(currentFile);
+        const imageuuid = imageUrl.slice(-36);
+
+        // FileReader
+        // upload(currentFile)
+        //   .then((res) =>
+        //     addImageToDialog(res, currentFile.name, currentFile.size)
+        //   )
+        //   .catch((err) => console.error(err));
+        // console.log(currentFile);
+        const imageType = currentFile.name.split(".")[1];
+        const imageName = imageuuid + "." + imageType;
+
+        // blob
+        if (currentFile) {
+          const reader = new FileReader();
+          reader.onload = function () {
+            if (reader.result) {
+              const blob = new Blob([reader.result], {
+                type: currentFile.type,
+              });
+              const imageBlob = blob;
+              addImageToDialog(
+                imageUrl,
+                imageName,
+                currentFile.size,
+                imageBlob
+              );
+            }
+          };
+          reader.readAsArrayBuffer(currentFile);
+        }
       }
     }
     return;
   };
 
-  const addImageToDialog = (url: string, altText: string, size: number) => {
-    console.log("addImageToDialog");
+  const addImageToDialog = (
+    url: string,
+    fileName: string,
+    size: number,
+    blob: Blob
+  ) => {
+    // console.log("addImageToDialog");
     const maxSizeInBytes = 200 * 1024; // 200KB
     setSelectedImages((prevImages) => {
       return [
         ...prevImages,
         {
           file: url,
-          alt: altText,
+          name: fileName,
+          alt: "",
           oversize: size > maxSizeInBytes,
           loading: true,
+          size,
+          blob,
         },
       ];
     });
@@ -91,9 +134,6 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
         disabled: true,
       },
     ]);
-    setTimeout(() => {
-      setImageLoading(false);
-    }, 3000);
   };
 
   const handleImageCaption = (
@@ -112,6 +152,12 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
       updatedImageDescription[index].link = "";
     }
     setImagesDescription(updatedImageDescription);
+    const updatedSelectedImages = [...selectedImages];
+    updatedSelectedImages[index] = {
+      ...updatedSelectedImages[index],
+      alt: imageDescription,
+    };
+    setSelectedImages(updatedSelectedImages);
 
     // 改 link disabled狀態
     const updatedImageLinkDisabled = [...imageLinkDisabled];
@@ -142,7 +188,15 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
 
   // 拖曳列元素
   const [tmpImages, setTmpImages] = useState<
-    { file: string; alt: string; oversize: boolean; loading: boolean }[]
+    {
+      file: string;
+      name: string;
+      alt?: string;
+      oversize: boolean;
+      loading: boolean;
+      size: number;
+      blob: Blob;
+    }[]
   >([]);
   const handleDragStart = (
     index: number,
@@ -172,28 +226,38 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
 
   // 新增至編輯器
   const addImageToEditor = (
-    images: { file: string; alt: string }[],
+    images: {
+      file: string;
+      name: string;
+      alt?: string;
+      size: number;
+      blob: Blob;
+    }[],
     imagesDescription: { caption: string; link: string }[]
   ) => {
     if (editor && images) {
       images.map((item, index) => {
+        // console.log(index);
         if (imagesDescription[index]) {
           setNode(
             editor,
             "figure",
             item.file,
-            item.alt,
+            item.name,
             imagesDescription[index]?.caption,
             imagesDescription[index]?.link
           );
         } else {
-          setNode(editor, "image", item.file, item.alt);
+          setNode(editor, "image", item.file, item.name);
         }
         setEditorImages((prevImages: any) => [
           ...prevImages,
           {
             file: item.file,
-            alt: item.alt,
+            name: item.name,
+            alt: item?.alt,
+            size: item.size,
+            blob: item.blob,
           },
         ]);
       });
@@ -382,7 +446,7 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
                           ) : (
                             <img
                               src={image.file}
-                              alt={image.alt}
+                              alt={image.name}
                               className=""
                             />
                           )}

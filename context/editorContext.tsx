@@ -3,7 +3,10 @@ import React, { useState, ReactNode, createContext, useEffect } from "react";
 
 export interface ImageData {
   file: string;
+  name: string;
   alt?: string;
+  size: number;
+  blob: Blob;
 }
 export interface EditorContentProps {
   data: string;
@@ -26,16 +29,20 @@ const EditorContentContext = createContext<EditorContentProps | undefined>({
 interface ContainerProps {
   children: ReactNode;
 }
+
 // mediaContent為 + 多媒體content
 export const EditorProvider = ({ children }: ContainerProps) => {
   const [data, setData] = useState<string>("");
   const [editorImages, setEditorImages] = useState<ImageData[]>([]);
 
   // useEffect(() => {
-  //   console.log("editorImages changed");
-  //   console.log(`length:${editorImages.length}`);
+  //   console.log(`editorImages changed,length:${editorImages.length}`);
   //   editorImages.map((item, index) => {
-  //     console.log(`index:${index},name:${item.alt}`);
+  //     console.log(
+  //       `index:${index},name:${item.name}${
+  //         item.alt ? ",alt:" + item.alt : ""
+  //       },blob:${item.blob.size},${item.blob.type}`
+  //     );
   //   });
   // }, [editorImages]);
   return (

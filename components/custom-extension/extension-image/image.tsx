@@ -14,6 +14,7 @@ declare module "@tiptap/core" {
        */
       setImage: (options: {
         src: string;
+        fileName: string;
         alt?: string;
         title?: string;
         class?: string;
@@ -52,6 +53,9 @@ export const CustomImage = Node.create<ImageOptions>({
       src: {
         default: null,
       },
+      fileName: {
+        default: null,
+      },
       alt: {
         default: null,
       },
@@ -86,6 +90,7 @@ export const CustomImage = Node.create<ImageOptions>({
         {
           src: HTMLAttributes.src,
           alt: HTMLAttributes.alt,
+          fileName: HTMLAttributes.fileName,
           title: HTMLAttributes.title,
           class: "w-full",
         },
@@ -117,9 +122,9 @@ export const CustomImage = Node.create<ImageOptions>({
         find: inputRegex,
         type: this.type,
         getAttributes: (match) => {
-          const [, , alt, src, title] = match;
+          const [, , src, fileName, alt, title] = match;
 
-          return { src, alt, title };
+          return { src, fileName, alt, title };
         },
       }),
     ];

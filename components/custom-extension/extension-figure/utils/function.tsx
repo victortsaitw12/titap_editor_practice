@@ -9,7 +9,7 @@ export const setNode = (
   editor: Editor | null,
   type: string,
   src: string,
-  alt: string,
+  name: string,
   caption?: string,
   link?: string
 ) => {
@@ -19,7 +19,7 @@ export const setNode = (
       .focus()
       .setImage({
         src: src,
-        alt: alt,
+        fileName: name,
       })
       .run();
   } else {
@@ -28,8 +28,9 @@ export const setNode = (
       .focus()
       .setFigure({
         src: src,
+        fileName: name,
         caption: caption,
-        alt: alt,
+        alt: caption,
         link: link,
       })
       .run();
@@ -39,18 +40,22 @@ export const setNode = (
 
 export const deleteNode = (editor: Editor | null, type: string) => {
   if (editor) {
-    if (type === "image") {
-      const { state } = editor;
-      const { from, to } = state.selection;
-      editor
-        .chain()
-        .focus()
-        .createParagraphNear()
-        .deleteRange({ from: from, to: to })
-        .run();
-    } else {
-      editor.chain().focus().selectParentNode().deleteSelection().run();
-    }
+    editor.chain().focus().selectParentNode().deleteSelection().run();
+
+    // if (type === "image") {
+    //   const { state } = editor;
+    //   const { from, to } = state.selection;
+    //   console.log(`from:${from},to:${to}`);
+    //   editor
+    //     .chain()
+    //     .focus()
+    //     .createParagraphNear()
+    //     .deleteRange({ from: from, to: to })
+    //     .run();
+    //   editor.chain().focus().selectParentNode().deleteSelection().run();
+    // } else {
+    //   editor.chain().focus().selectParentNode().deleteSelection().run();
+    // }
   }
 };
 
@@ -77,7 +82,7 @@ export const changeNodeClass = (
     }
   }
 };
-
+// FileReader 壓縮 & 上傳
 export const compressImage = (image: any, scale: number, factor: number) => {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -86,32 +91,15 @@ export const compressImage = (image: any, scale: number, factor: number) => {
   canvas.width = cvWidth;
   canvas.height = cvHeight;
   ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
   // 取得壓縮後的Data URL
   return canvas.toDataURL("image/jpeg");
 };
-
 export const upload = (file: File) => {
-  const fileSize = file.size / 1024; //KB
-  const maxSize = 200;
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (event) => {
-      console.log(`fileSize:${fileSize}`);
-      if (fileSize > 200) {
-        const scale = (fileSize - maxSize) / fileSize;
-        const factor = 0.18;
-        const img = document.createElement("img");
-        img.src = event.target?.result as string;
-        img.onload = () => {
-          const compressedDataURL = compressImage(img, scale, factor);
-
-          resolve(compressedDataURL);
-        };
-      } else {
-        const imageURL = event.target?.result as string;
-        resolve(imageURL);
-      }
+      const imageURL = event.target?.result as string;
+      resolve(imageURL);
     };
     reader.onerror = (error) => {
       reject(error);

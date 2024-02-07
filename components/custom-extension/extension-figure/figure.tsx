@@ -26,6 +26,7 @@ declare module "@tiptap/core" {
        */
       setFigure: (options: {
         src: string;
+        fileName: string;
         alt?: string;
         title?: string;
         caption?: string;
@@ -70,10 +71,24 @@ export const Figure = Node.create<FigureOptions>({
         },
       },
 
+      fileName: {
+        default: null,
+        parseHTML: (element) => {
+          const ele = element as HTMLElement;
+          const caption = ele.lastChild?.firstChild?.textContent;
+          return (
+            element.querySelector("img")?.getAttribute("fileName") || caption
+          );
+        },
+      },
+
       alt: {
         default: null,
-        parseHTML: (element) =>
-          element.querySelector("img")?.getAttribute("alt"),
+        parseHTML: (element) => {
+          const ele = element as HTMLElement;
+          const caption = ele.lastChild?.firstChild?.textContent;
+          return element.querySelector("img")?.getAttribute("alt") || caption;
+        },
       },
 
       title: {
@@ -127,7 +142,7 @@ export const Figure = Node.create<FigureOptions>({
   renderHTML({ HTMLAttributes }) {
     const dataCaption = HTMLAttributes.caption;
     const captionLink = HTMLAttributes.captionLink;
-    console.log(`dataCaption:${dataCaption}, captionLink:${captionLink}`);
+    // console.log(`dataCaption:${dataCaption}, captionLink:${captionLink}`);
     return [
       "figure",
       mergeAttributes(this.options.HTMLAttributes, {
@@ -139,6 +154,7 @@ export const Figure = Node.create<FigureOptions>({
         "img",
         {
           src: HTMLAttributes.src,
+          fileName: HTMLAttributes.fileName,
           alt: HTMLAttributes.alt,
           title: HTMLAttributes.title,
           draggable: false,
@@ -208,9 +224,9 @@ export const Figure = Node.create<FigureOptions>({
         find: inputRegex,
         type: this.type,
         getAttributes: (match) => {
-          const [, src, alt, title, captionLink] = match;
+          const [, src, fileName, alt, title, captionLink] = match;
 
-          return { src, alt, title, captionLink };
+          return { src, fileName, alt, title, captionLink };
         },
       }),
     ];

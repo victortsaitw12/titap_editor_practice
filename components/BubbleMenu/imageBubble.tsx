@@ -34,9 +34,8 @@ const ImageFigureMenu = ({
       : editor?.getAttributes("image");
     let attrsIndex = 0;
     editorImages.map((item: any, index: any) => {
-      if (item.alt === attrs.alt) {
+      if (item.name === attrs.name) {
         attrsIndex = index;
-        // console.log(`index:${index},name:${item.alt}`);
         return;
       }
     });
@@ -71,7 +70,7 @@ const ImageFigureMenu = ({
         size="sm"
         pressed={true}
         onPressedChange={() => {
-          console.log(`isFigureActive:${isFigureActive}`);
+          // console.log(`isFigureActive:${isFigureActive}`);
           changeNodeClass(
             editor,
             isFigureActive ? "figure" : "image",
