@@ -28,7 +28,7 @@ type Props = {
 };
 function Toolbar({ editor }: Props) {
   const [align, setAlign] = useState("left");
-  const { isOpen, setIsOpen } = useContext<MediaContentProps | any>(
+  const { isOpen, setIsOpen, isDisabled } = useContext<MediaContentProps | any>(
     MediaContentContext
   );
   // tooltip delayDuration
@@ -64,14 +64,19 @@ function Toolbar({ editor }: Props) {
     // <div className='border border-input bg-transparent rounded-sm'>
     <>
       <div
-        className="ps-[10px] pt-[5px] pe-[6px] relative"
+        className={`pt-[5px] px-[6px] relative hover:bg-muted rounded-md ${
+          isDisabled ? "opacity-50 bg-neutral-200 hover:bg-neutral-200" : ""
+        }`}
         onClick={(e) => {
           setIsOpen(true);
           e.stopPropagation();
         }}
       >
         <CustomTooltip delayDuration={delayDuration} content="多媒體">
-          <button>
+          <button
+            className={`${isDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+            disabled={isDisabled}
+          >
             <Plus size={20}></Plus>
           </button>
         </CustomTooltip>

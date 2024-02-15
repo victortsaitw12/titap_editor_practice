@@ -26,6 +26,9 @@ import CustomParagraph from "./custom-extension/extension-paragraph";
 import Small from "./custom-extension/extension-small";
 import EventExtension from "./custom-extension/extension-event";
 import CustomYoutube from "./custom-extension/extension-youtube";
+import MediaContentContext, {
+  MediaContentProps,
+} from "@/context/mediaContentContext";
 
 function Tiptap({
   description,
@@ -38,6 +41,9 @@ function Tiptap({
     EditorContentProps | any
   >(EditorContentContext);
   const [title, setTitle] = useState("");
+  const { setIsDisabled } = useContext<MediaContentProps | any>(
+    MediaContentContext
+  );
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -98,6 +104,18 @@ function Tiptap({
 
       // console.log(JSON.stringify(editor.getJSON()));
       // console.log(JSON.parse(JSON.stringify(editor.getJSON())));
+    },
+    // 先foucs在編輯器再判斷該行是否為空字串
+    onFocus({ editor, event }) {
+      editor.on("transaction", ({ transaction }) => {
+        if (transaction.selection.$anchor.parentOffset === 0) {
+          console.log("empty line");
+          setIsDisabled(false);
+        } else {
+          console.log("not empty line");
+          setIsDisabled(true);
+        }
+      });
     },
   });
 

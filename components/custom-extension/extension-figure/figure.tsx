@@ -231,47 +231,4 @@ export const Figure = Node.create<FigureOptions>({
       }),
     ];
   },
-  addProseMirrorPlugins() {
-    return [
-      new Plugin({
-        key: new PluginKey("eventHandler"),
-        props: {
-          handleClick(view, pos, event) {
-            // 確保 event 是 MouseEvent
-            if (event instanceof MouseEvent) {
-              // 獲取點擊位置的 ProseMirror 位置
-              const posInDoc = view.posAtCoords({
-                left: event.clientX,
-                top: event.clientY,
-              });
-              const { schema, doc, tr } = view.state;
-              // console.log(view.state);
-              if (posInDoc) {
-                const resolvePosition = doc.resolve(posInDoc.pos);
-                const selectType = resolvePosition.parent.type.name;
-                if (selectType === "figure") {
-                  const start =
-                    resolvePosition.parentOffset === 0
-                      ? posInDoc.pos
-                      : posInDoc.pos - resolvePosition.parentOffset;
-                  const caption = resolvePosition.nodeAfter?.text?.length;
-                  const end =
-                    resolvePosition.parentOffset === 0
-                      ? posInDoc.pos + (caption ? caption : 0)
-                      : posInDoc.pos;
-                  const $start = doc.resolve(start);
-                  const $end = doc.resolve(end);
-                  const transaction = tr.setSelection(
-                    new TextSelection($start, $end)
-                  );
-                  view.dispatch(transaction);
-                  event.stopPropagation();
-                }
-              }
-            }
-          },
-        },
-      }),
-    ];
-  },
 });

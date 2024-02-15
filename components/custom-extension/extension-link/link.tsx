@@ -18,30 +18,4 @@ export const CustomLink = Link.extend({
       0,
     ];
   },
-  addProseMirrorPlugins() {
-    return [
-      new Plugin({
-        key: new PluginKey("eventHandler"),
-        props: {
-          handleClick(view, pos, event) {
-            const { schema, doc, tr } = view.state;
-            const attrs = getMarkAttrs(view.state, schema.marks.link);
-            const range = getMarkRange(doc.resolve(pos), schema.marks.link);
-            if (!range) {
-              return;
-            }
-            if (attrs.href) {
-              const $start = doc.resolve(range.from);
-              const $end = doc.resolve(range.to);
-              const transaction = tr.setSelection(
-                new TextSelection($start, $end)
-              );
-              view.dispatch(transaction);
-              event.stopPropagation();
-            }
-          },
-        },
-      }),
-    ];
-  },
 });
