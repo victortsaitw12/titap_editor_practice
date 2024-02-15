@@ -87,7 +87,8 @@ body {
 }
 .head {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  justify-content: flex-end;
   align-items: center;
   padding: 14px;
   color: rgba(0, 0, 0, 0.6);

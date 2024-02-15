@@ -34,9 +34,10 @@ function Tiptap({
   description: string;
   onChange: (richText: string) => void;
 }) {
-  const { data, setData, editorImages, setEditorImages } = useContext<
+  const { setEditorTitle, setData, editorImages, setEditorImages } = useContext<
     EditorContentProps | any
   >(EditorContentContext);
+  const [title, setTitle] = useState("");
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -92,9 +93,9 @@ function Tiptap({
     },
     onUpdate({ editor }) {
       onChange(editor.getHTML());
-      setData(JSON.stringify(editor.getJSON()));
+      // setData(JSON.stringify(editor.getJSON()));
+      // setData(editor.getHTML());
 
-      // console.log(editor.getHTML());
       // console.log(JSON.stringify(editor.getJSON()));
       // console.log(JSON.parse(JSON.stringify(editor.getJSON())));
     },
@@ -128,8 +129,10 @@ function Tiptap({
       (
         item: {
           file: string;
+          name: string;
           alt?: string;
           size: number;
+          blob: Blob;
         },
         index: number
       ) => {
@@ -160,6 +163,7 @@ function Tiptap({
           const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
           const factor = 0.18;
           const img = document.createElement("img");
+          const imgType = item.name.split(".")[1];
           img.src = item.file as string;
           img.onload = async () => {
             const cvWidth = img.width * (1 - scale + factor);
@@ -170,8 +174,9 @@ function Tiptap({
             canvas.toBlob(function (blob) {
               const newEditorImages = [...editorImages];
               const newBlobUrl = blob && URL.createObjectURL(blob);
+              const imageName = newBlobUrl?.slice(-36) + "." + imgType;
               newEditorImages[index].file = newBlobUrl;
-              newEditorImages[index].name = newBlobUrl?.slice(-36);
+              newEditorImages[index].name = imageName;
               newEditorImages[index].size = blob?.size;
               newEditorImages[index].blob = blob;
               setEditorImages(newEditorImages);
@@ -181,19 +186,22 @@ function Tiptap({
       }
     );
   };
+
+  const prepareToPost = () => {
+    if (title) {
+      setEditorTitle(title);
+      compressOverSizeImage();
+      setData(editor?.getHTML());
+    } else {
+      alert("請輸入標題");
+    }
+  };
   return (
     <>
       <div className="w-full fixed top-0 left-0 bg-white z-50">
         <div className="head">
-          <div>{updateDt} 已自動儲存</div>
-          <Button
-            onClick={() => {
-              // console.log(data);
-              compressOverSizeImage();
-            }}
-          >
-            準備發佈
-          </Button>
+          {/* <div>{updateDt} 已自動儲存</div> */}
+          <Button onClick={prepareToPost}>準備發佈</Button>
         </div>
         <div className="toolbar mx-auto">
           <Toolbar editor={editor} />
@@ -201,7 +209,15 @@ function Tiptap({
       </div>
       <div className="container relative z-10">
         <div className="title-wrap">
-          <input className="title" type="text" defaultValue={"Title"} />
+          <input
+            className="title"
+            type="text"
+            // defaultValue={"Title"}
+            value={title}
+            placeholder="請輸入標題"
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+          />
         </div>
         {/* <FloatingMenuList editor={editor}/> */}
         <BubbleMenuList

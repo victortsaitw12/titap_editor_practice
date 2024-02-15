@@ -9,6 +9,8 @@ export interface ImageData {
   blob: Blob;
 }
 export interface EditorContentProps {
+  editorTitle: string;
+  setEditorTitle: React.Dispatch<React.SetStateAction<string>>;
   data: string;
   setData: React.Dispatch<React.SetStateAction<string>>;
   editorImages: ImageData[];
@@ -16,6 +18,10 @@ export interface EditorContentProps {
 }
 
 const EditorContentContext = createContext<EditorContentProps | undefined>({
+  editorTitle: "",
+  setEditorTitle: function (): void {
+    throw new Error("Function not implemented.");
+  },
   data: "",
   setData: function (): void {
     throw new Error("Function not implemented.");
@@ -32,22 +38,36 @@ interface ContainerProps {
 
 // mediaContent為 + 多媒體content
 export const EditorProvider = ({ children }: ContainerProps) => {
+  const [editorTitle, setEditorTitle] = useState<string>("");
   const [data, setData] = useState<string>("");
   const [editorImages, setEditorImages] = useState<ImageData[]>([]);
 
-  // useEffect(() => {
-  //   console.log(`editorImages changed,length:${editorImages.length}`);
-  //   editorImages.map((item, index) => {
-  //     console.log(
-  //       `index:${index},name:${item.name}${
-  //         item.alt ? ",alt:" + item.alt : ""
-  //       },blob:${item.blob.size},${item.blob.type}`
-  //     );
-  //   });
-  // }, [editorImages]);
+  useEffect(() => {
+    const editorContent = {
+      editorTitle,
+      content: { data },
+      imageObject: { editorImages },
+    };
+    //   editorImages.map((item, index) => {
+    //     console.log(
+    //       `index:${index},name:${item.name}${
+    //         item.alt ? ",alt:" + item.alt : ""
+    //       },blob:${item.blob.size},${item.blob.type}`
+    //     );
+    //   });
+    console.log("editorContent created:", editorContent);
+  }, [editorTitle, data, editorImages]);
+
   return (
     <EditorContentContext.Provider
-      value={{ data, setData, editorImages, setEditorImages }}
+      value={{
+        editorTitle,
+        setEditorTitle,
+        data,
+        setData,
+        editorImages,
+        setEditorImages,
+      }}
     >
       {children}
     </EditorContentContext.Provider>

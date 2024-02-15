@@ -1,9 +1,5 @@
 "use client";
-import EditorContentContext, {
-  EditorContentProps,
-} from "@/context/editorContext";
 import { Editor } from "@tiptap/react";
-import { useContext } from "react";
 
 export const setNode = (
   editor: Editor | null,

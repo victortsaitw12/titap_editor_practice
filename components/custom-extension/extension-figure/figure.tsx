@@ -129,8 +129,8 @@ export const Figure = Node.create<FigureOptions>({
         contentElement: "a",
       },
       {
-        tag: "div img",
-        content: "small span",
+        tag: "div",
+        content: "img small span",
       },
       {
         tag: "p",

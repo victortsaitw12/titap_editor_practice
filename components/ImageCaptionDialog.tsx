@@ -1,5 +1,5 @@
 // ImageUploadDialog.tsx
-import React, { useState, useEffect, Dispatch, SetStateAction } from "react";
+import React, { useState, Dispatch, SetStateAction, useContext } from "react";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -12,6 +12,9 @@ import {
 import { Pencil, Link } from "lucide-react";
 import { type Editor } from "@tiptap/react";
 import { setNode } from "./custom-extension/extension-figure/utils/function";
+import EditorContentContext, {
+  EditorContentProps,
+} from "@/context/editorContext";
 
 type ImageCaptionDialogProps = {
   editor: Editor | null;
@@ -26,17 +29,9 @@ const ImageCaptionDialog = ({
 }: ImageCaptionDialogProps) => {
   const [imageCaption, setImageCaption] = useState("");
   const [imageLink, setImageLink] = useState("");
-  useEffect(() => {
-    const figureAttr = editor?.getAttributes("figure");
-    if (figureAttr) {
-      if (figureAttr.caption) {
-        setImageCaption(figureAttr.caption);
-      }
-      if (figureAttr.captionLink) {
-        setImageLink(figureAttr.captionLink);
-      }
-    }
-  }, []);
+  const { editorImages, setEditorImages } = useContext<
+    EditorContentProps | any
+  >(EditorContentContext);
 
   const handleSetImageCaption = () => {
     const imageSrc = editor?.isActive("figure")
@@ -44,17 +39,30 @@ const ImageCaptionDialog = ({
       : editor?.isActive("image")
       ? editor?.getAttributes("image").src
       : "";
-    const imageAlt = editor?.isActive("figure")
-      ? editor?.getAttributes("figure").alt
+    const imageName = editor?.isActive("figure")
+      ? editor?.getAttributes("figure").fileName
       : editor?.isActive("image")
-      ? editor?.getAttributes("image").alt
+      ? editor?.getAttributes("image").fileName
       : "";
     editor?.chain().lift("figure").deleteSelection().run();
     if (imageCaption) {
-      setNode(editor, "figure", imageSrc, imageAlt, imageCaption, imageLink);
+      setNode(editor, "figure", imageSrc, imageName, imageCaption, imageLink);
     } else {
-      setNode(editor, "image", imageSrc, imageAlt);
+      setNode(editor, "image", imageSrc, imageName);
     }
+    const updateEditorImages = [...editorImages];
+    let updateIdx = 0;
+    updateEditorImages.map((item, index) => {
+      if ((item.file as String) === imageSrc) {
+        updateIdx = index;
+        return;
+      }
+    });
+    updateEditorImages[updateIdx] = {
+      ...updateEditorImages[updateIdx],
+      alt: imageCaption,
+    };
+    setEditorImages(updateEditorImages);
     setImageFigureOpen(false);
   };
   const linkDisabled = imageCaption.length === 0;
@@ -64,6 +72,19 @@ const ImageCaptionDialog = ({
       <AlertDialogTrigger
         className="p-[10px]"
         onClick={(e) => {
+          const figureAttr =
+            editor?.isActive("figure") && editor?.getAttributes("figure");
+          if (figureAttr) {
+            if (figureAttr.caption) {
+              setImageCaption(figureAttr.caption);
+            }
+            if (figureAttr.captionLink) {
+              setImageLink(figureAttr.captionLink);
+            }
+          } else {
+            setImageCaption("");
+            setImageLink("");
+          }
           setImageFigureOpen(true);
           e.stopPropagation();
         }}
@@ -129,8 +150,6 @@ const ImageCaptionDialog = ({
             className="rounded-xl text-black bg-white px-5 py-3 hover:bg-neutral-100 disabled:cursor-not-allowed"
             onClick={(e) => {
               const figureAttr = editor?.getAttributes("figure");
-              setImageCaption(figureAttr?.caption || "");
-              setImageLink(figureAttr?.captionLink || "");
               setImageFigureOpen(false);
               e.stopPropagation();
             }}
@@ -141,6 +160,7 @@ const ImageCaptionDialog = ({
             className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
             onClick={(e) => {
               handleSetImageCaption();
+              setImageCaption("");
             }}
           >
             <span>確認</span>
