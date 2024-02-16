@@ -70,7 +70,6 @@ const ImageFigureMenu = ({
         size="sm"
         pressed={true}
         onPressedChange={() => {
-          // console.log(`isFigureActive:${isFigureActive}`);
           changeNodeClass(
             editor,
             isFigureActive ? "figure" : "image",

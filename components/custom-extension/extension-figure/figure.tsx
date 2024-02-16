@@ -142,7 +142,6 @@ export const Figure = Node.create<FigureOptions>({
   renderHTML({ HTMLAttributes }) {
     const dataCaption = HTMLAttributes.caption;
     const captionLink = HTMLAttributes.captionLink;
-    // console.log(`dataCaption:${dataCaption}, captionLink:${captionLink}`);
     return [
       "figure",
       mergeAttributes(this.options.HTMLAttributes, {
@@ -190,7 +189,6 @@ export const Figure = Node.create<FigureOptions>({
       setFigure:
         ({ caption, link, ...attrs }) =>
         ({ chain }) => {
-          // console.log(`caption:${caption},link:${link}`);
           return (
             chain()
               .insertContent({

@@ -274,16 +274,34 @@ h3 {
 ::-webkit-scrollbar-thumb {
   background: #ccc;
 }
-
 div[data-youtube-video] {
   width: calc(740px + calc(var(--youtube-border-width) * 2));
   border: var(--youtube-border-width) solid #000;
   cursor: move !important;
+  position: relative;
+}
+div[data-youtube-video]:hover::before {
+  height: 50px;
+  content: "\1F6C8";
+  font-size: 24px;
+  position: absolute;
+  top: -40px;
+  left: 49%;
+  cursor: pointer;
 }
 div[data-instagram-post] {
   width: calc(var(--instagram-width) + calc(var(--embed-border-width) * 2));
   border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
+}
+div[data-instagram-post]:hover::before {
+  height: 50px;
+  content: "\1F6C8";
+  font-size: 24px;
+  position: absolute;
+  top: -12px;
+  left: 36%;
+  cursor: pointer;
 }
 div[data-twitter-post] {
   width: calc(var(--twitter-width) + calc(var(--embed-border-width) * 2));
@@ -291,12 +309,31 @@ div[data-twitter-post] {
   border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
+div[data-twitter-post]:hover::before {
+  height: 60px;
+  content: "\1F6C8";
+  font-size: 24px;
+  position: absolute;
+  top: -13px;
+  left: 40%;
+  cursor: pointer;
+}
 div[data-facebook] {
   width: calc(var(--facebook-width) + calc(var(--embed-border-width) * 2));
   height: 100%;
   border: var(--embed-border-width) solid #ddd;
   cursor: move !important;
 }
+div[data-facebook]:hover::before {
+  height: 50px;
+  content: "\1F6C8";
+  font-size: 24px;
+  position: absolute;
+  top: -12px;
+  left: 40.5%;
+  cursor: pointer;
+}
+
 figure[data-figure].fullFigure,
 .fullImage {
   width: 100vw;

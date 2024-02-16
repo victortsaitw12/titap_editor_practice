@@ -8,7 +8,7 @@ import {
 import { Link, AlertTriangle } from "lucide-react";
 import { type Editor } from "@tiptap/react";
 import { Table, TableBody, TableRow, TableCell } from "./ui/table";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   FACEBOOK_POST_REGEX,
   FACEBOOK_VIDEO_REGEX,
@@ -16,6 +16,9 @@ import {
 import { TWITTER_REGEX } from "./custom-extension/extension-twitter";
 import { INSTAGRAM_REGEX } from "./custom-extension/extension-instagram";
 import CustomTooltip from "./tooltipContent";
+import MediaContentContext, {
+  MediaContentProps,
+} from "@/context/mediaContentContext";
 
 type Props = {
   editor: Editor | null;
@@ -23,6 +26,9 @@ type Props = {
 };
 
 const MediaLinkDialog = ({ editor, delayDuration }: Props) => {
+  const { setIsOpen } = useContext<MediaContentProps | any>(
+    MediaContentContext
+  );
   const [mediaLinkValue, setMediaLinkValue] = useState("");
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
   const [mediaLinkCheck, setMediaLinkCheck] = useState(true);
@@ -121,7 +127,11 @@ const MediaLinkDialog = ({ editor, delayDuration }: Props) => {
               </div>
               <button
                 className="rounded-xl px-7 py-3 text-white bg-neutral-700 hover:bg-black cursor-pointer"
-                onClick={handleMediaLink}
+                onClick={(e) => {
+                  handleMediaLink();
+                  setIsOpen(false);
+                  e.stopPropagation();
+                }}
               >
                 完成
               </button>

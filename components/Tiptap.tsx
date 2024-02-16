@@ -108,13 +108,9 @@ function Tiptap({
     // 先foucs在編輯器再判斷該行是否為空字串
     onFocus({ editor, event }) {
       editor.on("transaction", ({ transaction }) => {
-        if (transaction.selection.$anchor.parentOffset === 0) {
-          console.log("empty line");
-          setIsDisabled(false);
-        } else {
-          console.log("not empty line");
-          setIsDisabled(true);
-        }
+        setIsDisabled(
+          transaction.selection.$anchor.parentOffset === 0 ? false : true
+        );
       });
     },
   });
@@ -235,6 +231,9 @@ function Tiptap({
             placeholder="請輸入標題"
             onChange={(e) => setTitle(e.target.value)}
             autoFocus
+            onFocus={() => {
+              setIsDisabled(true);
+            }}
           />
         </div>
         {/* <FloatingMenuList editor={editor}/> */}
