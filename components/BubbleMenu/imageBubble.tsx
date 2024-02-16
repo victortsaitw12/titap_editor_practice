@@ -11,12 +11,14 @@ import {
 import EditorContentContext, {
   EditorContentProps,
 } from "@/context/editorContext";
+import CustomTooltip from "../tooltipContent";
 
 interface ImageFigureMenuProps {
   editor: Editor;
   imageFigureOpen: boolean;
   setImageFigureOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isFigureActive: boolean;
+  delayDuration: number;
 }
 
 const ImageFigureMenu = ({
@@ -24,6 +26,7 @@ const ImageFigureMenu = ({
   imageFigureOpen,
   setImageFigureOpen,
   isFigureActive,
+  delayDuration,
 }: ImageFigureMenuProps) => {
   const { editorImages, setEditorImages } = useContext<
     EditorContentProps | any
@@ -83,15 +86,18 @@ const ImageFigureMenu = ({
         editor={editor}
         imageFigureOpen={imageFigureOpen}
         setImageFigureOpen={setImageFigureOpen}
+        delayDuration={delayDuration}
       ></ImageCaptionDialog>
-      <Toggle
-        className="bubble-menu-item"
-        size="sm"
-        pressed={true}
-        onPressedChange={handleRemoveImage}
-      >
-        <Trash2></Trash2>
-      </Toggle>
+      <CustomTooltip delayDuration={delayDuration} content="移除">
+        <Toggle
+          className="bubble-menu-item"
+          size="sm"
+          pressed={true}
+          onPressedChange={handleRemoveImage}
+        >
+          <Trash2></Trash2>
+        </Toggle>
+      </CustomTooltip>
     </>
   );
 };

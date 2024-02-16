@@ -15,17 +15,20 @@ import { setNode } from "./custom-extension/extension-figure/utils/function";
 import EditorContentContext, {
   EditorContentProps,
 } from "@/context/editorContext";
+import CustomTooltip from "./tooltipContent";
 
 type ImageCaptionDialogProps = {
   editor: Editor | null;
   imageFigureOpen: boolean;
   setImageFigureOpen: Dispatch<SetStateAction<boolean>>;
+  delayDuration: number;
 };
 
 const ImageCaptionDialog = ({
   editor,
   imageFigureOpen,
   setImageFigureOpen,
+  delayDuration,
 }: ImageCaptionDialogProps) => {
   const [imageCaption, setImageCaption] = useState("");
   const [imageLink, setImageLink] = useState("");
@@ -69,28 +72,31 @@ const ImageCaptionDialog = ({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger
-        className="p-[10px]"
-        onClick={(e) => {
-          const figureAttr =
-            editor?.isActive("figure") && editor?.getAttributes("figure");
-          if (figureAttr) {
-            if (figureAttr.caption) {
-              setImageCaption(figureAttr.caption);
+      <CustomTooltip delayDuration={delayDuration} content="編輯">
+        <AlertDialogTrigger
+          className="p-[10px]"
+          onClick={(e) => {
+            const figureAttr =
+              editor?.isActive("figure") && editor?.getAttributes("figure");
+            if (figureAttr) {
+              if (figureAttr.caption) {
+                setImageCaption(figureAttr.caption);
+              }
+              if (figureAttr.captionLink) {
+                setImageLink(figureAttr.captionLink);
+              }
+            } else {
+              setImageCaption("");
+              setImageLink("");
             }
-            if (figureAttr.captionLink) {
-              setImageLink(figureAttr.captionLink);
-            }
-          } else {
-            setImageCaption("");
-            setImageLink("");
-          }
-          setImageFigureOpen(true);
-          e.stopPropagation();
-        }}
-      >
-        <Pencil />
-      </AlertDialogTrigger>
+            setImageFigureOpen(true);
+            e.stopPropagation();
+          }}
+        >
+          <Pencil />
+        </AlertDialogTrigger>
+      </CustomTooltip>
+
       <AlertDialogContent
         className="w-[800px] min-h-[400px]"
         onClick={(e) => {

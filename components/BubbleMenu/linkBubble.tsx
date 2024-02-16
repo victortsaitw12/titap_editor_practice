@@ -3,6 +3,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { X, Pencil, Unlink } from "lucide-react";
 import LinkContext, { LinkProps } from "@/context/linkContext";
 import { Editor } from "@tiptap/react";
+import CustomTooltip from "../tooltipContent";
 
 type Props = {
   editor: Editor | null;
@@ -11,6 +12,7 @@ type Props = {
   setLinkModify: React.Dispatch<React.SetStateAction<boolean>>;
   linkValue: string;
   setLinkValue: React.Dispatch<React.SetStateAction<string>>;
+  delayDuration: number;
 };
 const LinkMenu = ({
   editor,
@@ -19,6 +21,7 @@ const LinkMenu = ({
   setLinkModify,
   linkValue,
   setLinkValue,
+  delayDuration,
 }: Props) => {
   const { linkIsOpen, setLinkIsOpen } = useContext<LinkProps | any>(
     LinkContext
@@ -101,32 +104,36 @@ const LinkMenu = ({
             {editor?.getAttributes("link").href}
           </a>
           <div className="flex">
-            <Pencil
-              size={20}
-              color={"#bbb"}
-              className="me-2 cursor-pointer"
-              onClick={(e) => {
-                setLinkModify(false);
-                setLinkIsOpen(true);
-                e.stopPropagation();
-              }}
-            ></Pencil>
-            <Unlink
-              size={20}
-              color={"#bbb"}
-              className="cursor-pointer"
-              onClick={() => {
-                editor &&
-                  editor
-                    .chain()
-                    .focus()
-                    .extendMarkRange("link")
-                    .unsetLink()
-                    .run();
-                setLinkValue("");
-                setLinkModify(false);
-              }}
-            ></Unlink>
+            <CustomTooltip delayDuration={delayDuration} content="編輯">
+              <Pencil
+                size={20}
+                color={"#bbb"}
+                className="me-2 cursor-pointer"
+                onClick={(e) => {
+                  setLinkModify(false);
+                  setLinkIsOpen(true);
+                  e.stopPropagation();
+                }}
+              ></Pencil>
+            </CustomTooltip>
+            <CustomTooltip delayDuration={delayDuration} content="解除連結">
+              <Unlink
+                size={20}
+                color={"#bbb"}
+                className="cursor-pointer"
+                onClick={() => {
+                  editor &&
+                    editor
+                      .chain()
+                      .focus()
+                      .extendMarkRange("link")
+                      .unsetLink()
+                      .run();
+                  setLinkValue("");
+                  setLinkModify(false);
+                }}
+              ></Unlink>
+            </CustomTooltip>
           </div>
         </div>
       )}

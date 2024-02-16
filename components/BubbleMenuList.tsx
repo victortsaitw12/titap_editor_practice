@@ -51,7 +51,8 @@ function BubbleMenuList({
   if (!editor) {
     return null;
   }
-
+  // tooltip delayDuration
+  const delayDuration = 0;
   return (
     <>
       <BubbleMenu
@@ -69,6 +70,7 @@ function BubbleMenuList({
             editor={editor}
             setLinkValue={setLinkValue}
             setLinkIsOpen={setLinkIsOpen}
+            delayDuration={delayDuration}
           />
         )}
 
@@ -79,11 +81,14 @@ function BubbleMenuList({
             imageFigureOpen={imageFigureOpen}
             setImageFigureOpen={setImageFigureOpen}
             isFigureActive={isFigureActive}
+            delayDuration={delayDuration}
           />
         )}
 
         {/* Youtube,Instagram,Twitter,Facebook menu */}
-        {mediaIsActive && <MediaMenu editor={editor} />}
+        {mediaIsActive && (
+          <MediaMenu editor={editor} delayDuration={delayDuration} />
+        )}
 
         {/* 輸入網址 area */}
         <LinkMenu
@@ -93,6 +98,7 @@ function BubbleMenuList({
           setLinkValue={setLinkValue}
           isLinkActive={isLinkActive}
           linkModify={linkModify}
+          delayDuration={delayDuration}
         />
       </BubbleMenu>
     </>
