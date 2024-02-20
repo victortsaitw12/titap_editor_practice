@@ -49,7 +49,15 @@ const ImageCaptionDialog = ({
       : "";
     editor?.chain().lift("figure").deleteSelection().run();
     if (imageCaption) {
-      setNode(editor, "figure", imageSrc, imageName, imageCaption, imageLink);
+      setNode(
+        editor,
+        "figure",
+        imageSrc,
+        imageName,
+        imageCaption,
+        imageLink,
+        true
+      );
     } else {
       setNode(editor, "image", imageSrc, imageName);
     }

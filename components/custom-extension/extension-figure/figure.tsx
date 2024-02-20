@@ -1,19 +1,6 @@
 "use client";
-import LinkContext, { LinkProps } from "@/context/linkContext";
-import {
-  findChildrenInRange,
-  mergeAttributes,
-  Node,
-  nodeInputRule,
-  Tracker,
-} from "@tiptap/core";
+import { mergeAttributes, Node, nodeInputRule } from "@tiptap/core";
 
-import {
-  NodeSelection,
-  Plugin,
-  PluginKey,
-  TextSelection,
-} from "@tiptap/pm/state";
 export interface FigureOptions {
   HTMLAttributes: Record<string, any>;
 }
@@ -32,13 +19,23 @@ declare module "@tiptap/core" {
         caption?: string;
         link?: string;
       }) => ReturnType;
+      updateFigure: (options: {
+        src: string;
+        fileName: string;
+        alt?: string;
+        title?: string;
+        caption?: string;
+        link?: string;
+      }) => ReturnType;
       setFigureClass: (options: { customClass: string }) => ReturnType;
+      setValue: () => ReturnType;
     };
   }
 }
 
 export const inputRegex = /!\[(.+|:?)]\((\S+)(?:(?:\s+)["'](\S+)["'])?\)/;
-
+let start = 0;
+let oldCaptionLength = 0;
 export const Figure = Node.create<FigureOptions>({
   name: "figure",
 
@@ -165,7 +162,7 @@ export const Figure = Node.create<FigureOptions>({
         "figcaption",
         {
           contenteditable: "false",
-          class: `${dataCaption ? "text-sm" : ""}`,
+          class: `${dataCaption ? "text-sm mt-1 text-center p-2" : ""}`,
         },
         [
           "a",
@@ -174,7 +171,7 @@ export const Figure = Node.create<FigureOptions>({
             class: `${dataCaption ? "text-sm" : ""} ${
               captionLink ? "" : "pointer-events-none"
             } caption`,
-            style: `${captionLink ? "" : "color:black"}`,
+            style: `${captionLink ? "" : "color:black;pointer-events: none"}`,
             href: `${captionLink ? captionLink : null}`,
             target: "_blank",
           },
@@ -188,19 +185,66 @@ export const Figure = Node.create<FigureOptions>({
     return {
       setFigure:
         ({ caption, link, ...attrs }) =>
-        ({ chain }) => {
+        ({ chain, tr }) => {
+          const captionLength = caption?.length;
+
+          if (oldCaptionLength === 0) {
+            oldCaptionLength = captionLength ? captionLength : 0;
+          }
+          if (start !== 0) {
+            start += oldCaptionLength ? oldCaptionLength + 1 : 1;
+          } else {
+            start = tr.selection.from;
+          }
+
           return (
             chain()
-              .insertContent({
+              .insertContentAt(start, {
                 type: this.name,
                 attrs: { ...attrs, captionLink: link, caption: caption },
                 content: caption ? [{ type: "text", text: caption }] : [],
               })
               // set cursor at end of caption field
               .command(({ tr, commands }) => {
-                const { doc, selection } = tr;
-                const startPos = selection.to - selection.$anchor.parentOffset;
-                const endPos = selection.to;
+                const startPos = start;
+                const endPos = captionLength ? start + captionLength : start;
+                oldCaptionLength = captionLength ? captionLength : 0;
+                return commands.setTextSelection({
+                  from: startPos,
+                  to: endPos,
+                });
+              })
+              .run()
+          );
+        },
+      setValue:
+        () =>
+        ({ chain }) => {
+          return chain()
+            .command(() => {
+              start = 0;
+              oldCaptionLength = 0;
+              return true;
+            })
+            .run();
+        },
+      updateFigure:
+        ({ caption, link, ...attrs }) =>
+        ({ chain, tr }) => {
+          const captionLength = caption?.length;
+          start = tr.selection.from;
+
+          return (
+            chain()
+              .insertContentAt(start, {
+                type: this.name,
+                attrs: { ...attrs, captionLink: link, caption: caption },
+                content: caption ? [{ type: "text", text: caption }] : [],
+              })
+              // set cursor at end of caption field
+              .command(({ tr, commands }) => {
+                const startPos = start;
+                const endPos = captionLength ? start + captionLength : start;
                 return commands.setTextSelection({
                   from: startPos,
                   to: endPos,

@@ -338,7 +338,8 @@ figure[data-figure].fullFigure,
 .fullImage {
   width: 100vw;
   height: 100%;
-  transform: translateX(-373px);
+  /* transform: translateX(-373px); */
+  transform: translateX(-625px);
 }
 .figure:hover,
 td img:hover {
@@ -355,9 +356,4 @@ td img:hover {
 .caption::selection {
   color: #68cef8;
   background: white;
-}
-figcaption {
-  margin-top: 0.25rem;
-  text-align: center;
-  padding: 0.5rem;
 }

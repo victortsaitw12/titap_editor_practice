@@ -7,7 +7,8 @@ export const setNode = (
   src: string,
   name: string,
   caption?: string,
-  link?: string
+  link?: string,
+  figureUpdate?: boolean
 ) => {
   if (type === "image") {
     editor
@@ -19,17 +20,31 @@ export const setNode = (
       })
       .run();
   } else {
-    editor
-      ?.chain()
-      .focus()
-      .setFigure({
-        src: src,
-        fileName: name,
-        caption: caption,
-        alt: caption,
-        link: link,
-      })
-      .run();
+    if (figureUpdate) {
+      editor
+        ?.chain()
+        .focus()
+        .updateFigure({
+          src: src,
+          fileName: name,
+          caption: caption,
+          alt: caption,
+          link: link,
+        })
+        .run();
+    } else {
+      editor
+        ?.chain()
+        .focus()
+        .setFigure({
+          src: src,
+          fileName: name,
+          caption: caption,
+          alt: caption,
+          link: link,
+        })
+        .run();
+    }
   }
   editor?.commands.createParagraphNear();
 };

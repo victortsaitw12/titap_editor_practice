@@ -39,6 +39,7 @@ type Props = {
 };
 
 const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
+  const maxImages = 3;
   const [imageLinkDisabled, setImageLinkDisabled] = useState<
     { disabled: boolean }[]
   >([{ disabled: true }]);
@@ -243,7 +244,8 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
             item.file,
             item.name,
             imagesDescription[index]?.caption,
-            imagesDescription[index]?.link
+            imagesDescription[index]?.link,
+            false
           );
         } else {
           setNode(editor, "image", item.file, item.name);
@@ -259,6 +261,9 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
           },
         ]);
       });
+      setTimeout(() => {
+        editor?.commands.setValue();
+      }, 8000);
       setSelectedImages([]);
       setImagesDescription([]);
       setImageLinkDisabled([{ disabled: true }]);
@@ -271,7 +276,7 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
           const updatedImages = [...selectedImages];
           updatedImages[index] = { ...item, loading: false };
           setSelectedImages(updatedImages);
-        }, 3000);
+        }, 1500);
       }
     });
   }, [selectedImages]);
@@ -316,7 +321,7 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
               </span>
               <label
                 className={`mt-4 px-3 py-2 text-sm rounded-lg border ${
-                  selectedImages.length >= 10
+                  selectedImages.length >= maxImages
                     ? "cursor-not-allowed bg-neutral-100 border-neutral-100 text-neutral-400"
                     : "cursor-pointer hover:bg-neutral-100  border-black text-black"
                 }`}
@@ -326,25 +331,25 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
                   className="hidden"
                   type="file"
                   onChange={handleAddImage}
-                  accept="image/jpeg, image/png, image/gif"
+                  accept="image/jpeg, image/png"
                   multiple
-                  disabled={selectedImages.length >= 10 ? true : false}
+                  disabled={selectedImages.length >= maxImages ? true : false}
                 />
               </label>
             </div>
           </div>
-          <div className="flex items-center text-neutral-400 mb-3">
-            {selectedImages.length <= 10 ? (
+          <div className="flex items-center text-amber-600 mb-3">
+            {selectedImages.length <= maxImages ? (
               <>
                 <Info className="w-5 h-5"></Info>
                 <span className="ms-1 text-sm">
-                  圖片最多為 10 張，格式僅接受 jpg, png, gif。
+                  圖片最多為 3 張，格式僅接受 jpg, png。
                 </span>
               </>
             ) : (
               <>
                 <AlertTriangle className="w-5 h-5"></AlertTriangle>
-                <span className="ms-1">最多一次上傳 10 張圖片</span>
+                <span className="ms-1">最多一次上傳 3 張圖片</span>
               </>
             )}
           </div>
@@ -493,7 +498,7 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
             className="rounded-xl bg-white ms-3 px-5 py-3 enabled:hover:bg-black enabled:bg-neutral-700 enabled:text-white disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
             disabled={
               selectedImages.length === 0 ||
-              selectedImages.length > 10 ||
+              selectedImages.length > maxImages ||
               selectedImages.filter((item) => item.loading === true).length > 0
             }
             onClick={(e) => {
