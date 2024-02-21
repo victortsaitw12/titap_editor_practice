@@ -338,7 +338,13 @@ const ImageUploadDialog = ({ editor, delayDuration }: Props) => {
               </label>
             </div>
           </div>
-          <div className="flex items-center text-amber-600 mb-3">
+          <div
+            className={`flex items-center ${
+              selectedImages.length <= maxImages
+                ? "text-neutral-400"
+                : "text-amber-600"
+            } mb-3`}
+          >
             {selectedImages.length <= maxImages ? (
               <>
                 <Info className="w-5 h-5"></Info>
